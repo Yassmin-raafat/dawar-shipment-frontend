@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
+import SignupForm from "@/features/auth/signup-form";
+
+export const metadata: Metadata = {
+  title: "Sign Up | Dawar Parcel",
+};
+
 export default function SignupPage() {
-  // Sign-up UI will be added here.
-  return null;
+  return <SignupForm />;
 }
