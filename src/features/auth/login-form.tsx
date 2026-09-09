@@ -2,9 +2,11 @@
 
 import DawarLogo from "@/components/ui/dawar-logo";
 import InputField from "@/components/ui/input-field";
+import { useAuthStore } from "@/features/auth/auth-store";
 import { login } from "@/services/auth-api";
 import { saveAccessToken } from "@/services/auth-storage";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
 import { useMemo, useState } from "react";
 
@@ -40,26 +42,44 @@ function validateLogin(values: LoginValues) {
 }
 
 export default function LoginForm() {
+  const router = useRouter();
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState<LoginErrors>({});
   const [submitError, setSubmitError] = useState("");
   const [submitSuccess, setSubmitSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const hasFieldErrors = useMemo(() => Object.keys(errors).length > 0, [errors]);
+  const setAuthenticated = useAuthStore(
+    (state) => state.setAuthenticated,
+  );
 
-  function updateValue(name: keyof LoginValues, value: string | boolean) {
-    setValues((current) => ({ ...current, [name]: value }));
+  const hasFieldErrors = useMemo(
+    () => Object.keys(errors).length > 0,
+    [errors],
+  );
+
+  function updateValue(
+    name: keyof LoginValues,
+    value: string | boolean,
+  ) {
+    setValues((current) => ({
+      ...current,
+      [name]: value,
+    }));
+
     setErrors((current) => {
       const nextErrors = { ...current };
       delete nextErrors[name];
       return nextErrors;
     });
+
     setSubmitError("");
     setSubmitSuccess("");
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>,
+  ) {
     event.preventDefault();
 
     const nextErrors = validateLogin(values);
@@ -76,11 +96,17 @@ export default function LoginForm() {
 
     try {
       const response = await login(values);
+
       saveAccessToken(response.token);
+      setAuthenticated(true);
+
       setSubmitSuccess(response.message);
+      router.push("/drivers");
     } catch (error) {
       setSubmitError(
-        error instanceof Error ? error.message : "Login failed. Try again.",
+        error instanceof Error
+          ? error.message
+          : "Login failed. Try again.",
       );
     } finally {
       setIsSubmitting(false);
@@ -92,7 +118,9 @@ export default function LoginForm() {
       <section
         aria-hidden="true"
         className="hidden min-h-screen bg-primary bg-cover bg-center lg:block"
-        style={{ backgroundImage: "url('/images/signup-visual.png')" }}
+        style={{
+          backgroundImage: "url('/images/signup-visual.png')",
+        }}
       />
 
       <section className="flex min-h-screen items-center justify-center overflow-y-auto px-5 py-8 sm:px-8 lg:px-10">
@@ -103,9 +131,13 @@ export default function LoginForm() {
             <h1 className="text-[29px] font-bold leading-tight tracking-normal text-text-primary">
               Welcome Back!
             </h1>
+
             <p className="mt-3 text-[14px] leading-[1.45] text-text-secondary">
               Don&apos;t have an account?{" "}
-              <Link className="font-semibold text-primary underline" href="/signup">
+              <Link
+                className="font-semibold text-primary underline"
+                href="/signup"
+              >
                 Create a new account now
               </Link>
               , it&apos;s FREE!
@@ -126,6 +158,7 @@ export default function LoginForm() {
               {submitError}
             </div>
           ) : null}
+
           {submitSuccess ? (
             <div
               aria-live="polite"
@@ -136,7 +169,9 @@ export default function LoginForm() {
           ) : null}
 
           <form
-            className={`${submitError || submitSuccess ? "mt-7" : "mt-10"} space-y-8`}
+            className={`${
+              submitError || submitSuccess ? "mt-7" : "mt-10"
+            } space-y-8`}
             noValidate
             onSubmit={handleSubmit}
           >
@@ -145,7 +180,9 @@ export default function LoginForm() {
               icon="email"
               id="email"
               label="Email Address"
-              onChange={(event) => updateValue("email", event.target.value)}
+              onChange={(event) =>
+                updateValue("email", event.target.value)
+              }
               placeholder="Enter your email"
               type="email"
               value={values.email}
@@ -157,7 +194,9 @@ export default function LoginForm() {
               icon="password"
               id="password"
               label="Password"
-              onChange={(event) => updateValue("password", event.target.value)}
+              onChange={(event) =>
+                updateValue("password", event.target.value)
+              }
               placeholder="Enter your password"
               type="password"
               value={values.password}
@@ -179,7 +218,10 @@ export default function LoginForm() {
 
               <p>
                 Forgot password?{" "}
-                <Link className="font-semibold text-primary" href="/forgot-password">
+                <Link
+                  className="font-semibold text-primary"
+                  href="/forgot-password"
+                >
                   Click here
                 </Link>
               </p>
