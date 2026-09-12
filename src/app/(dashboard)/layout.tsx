@@ -1,21 +1,16 @@
+import type { ReactNode } from "react";
 import AppHeader from "@/components/layout/app-header";
 import AppSidebar from "@/components/layout/app-sidebar";
-import ProtectedRoute from "@/features/auth/protected-route";
-import DriversPage from "@/features/drivers/components/drivers-page";
-import type { Metadata } from "next";
+import ProtectedRoute from "@/features/auth/components/protected-route";
 
-export const metadata: Metadata = {
-  title: "Drivers | Dawar Parcel",
-};
-
-export default function DriversRoutePage() {
+export default function DashboardLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-background text-text-primary lg:flex">
         <AppSidebar />
         <div className="min-w-0 flex-1">
           <AppHeader />
-          <DriversPage />
+          {children}
         </div>
       </div>
     </ProtectedRoute>

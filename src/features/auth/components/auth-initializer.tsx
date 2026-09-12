@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useAuthStore } from "@/features/auth/auth-store";
+import { useAuthStore } from "@/features/auth/stores/auth-store";
 
 export default function AuthInitializer() {
   const checkAuth = useAuthStore((state) => state.checkAuth);

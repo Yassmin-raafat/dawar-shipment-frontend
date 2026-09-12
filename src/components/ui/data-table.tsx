@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 export type DataTableColumn<TData> = {
   key: string;
-  header: string;
+  header: ReactNode;
   cell: (row: TData) => ReactNode;
   className?: string;
 };
@@ -21,14 +21,14 @@ export default function DataTable<TData>({
   getRowKey,
 }: DataTableProps<TData>) {
   return (
-    <div className="overflow-hidden rounded-[8px] border border-border bg-card">
+    <div className="overflow-hidden bg-card">
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse">
-          <thead className="bg-secondary">
+          <thead className="bg-background">
             <tr>
               {columns.map((column) => (
                 <th
-                  className={`border-b border-border px-5 py-4 text-left text-[12px] font-semibold uppercase tracking-normal text-text-secondary ${
+                  className={`px-5 py-4 text-left text-[10px] font-medium tracking-wide text-text-muted ${
                     column.className ?? ""
                   }`}
                   key={column.key}
@@ -40,7 +40,7 @@ export default function DataTable<TData>({
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-border">
+          <tbody className="divide-y divide-border/30">
             {data.length > 0 ? (
               data.map((row) => (
                 <tr
@@ -49,7 +49,7 @@ export default function DataTable<TData>({
                 >
                   {columns.map((column) => (
                     <td
-                      className={`px-5 py-4 text-[14px] text-text-primary ${
+                      className={`px-5 py-4 text-[12px] text-text-primary ${
                         column.className ?? ""
                       }`}
                       key={column.key}

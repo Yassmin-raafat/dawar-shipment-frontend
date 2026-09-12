@@ -1,18 +1,5 @@
-type SignupPayload = {
-  confirmPassword: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  password: string;
-  phone: string;
-  userRole: string;
-};
-
-type LoginPayload = {
-  email: string;
-  password: string;
-  rememberMe: boolean;
-};
+import { getMockProfileName, saveMockProfileName } from "@/features/auth/services/auth-storage";
+import type { AuthUser, LoginPayload, SignupPayload } from "@/features/auth/types/auth";
 
 function wait(milliseconds: number) {
   return new Promise((resolve) => {
@@ -26,6 +13,8 @@ export async function signup(payload: SignupPayload) {
   if (payload.email.toLowerCase() === "fail@example.com") {
     throw new Error("This email is already registered.");
   }
+
+  saveMockProfileName(payload.email, payload.firstName.trim());
 
   return {
     message: "Account created successfully.",
@@ -51,13 +40,13 @@ export async function login(payload: LoginPayload) {
     token: "mock-auth-token",
     user: {
       email: payload.email,
-      rememberMe: payload.rememberMe,
-    },
+      name: getMockProfileName(payload.email) ?? payload.email.split("@")[0].split(/[._-]/)[0].replace(/^./, (letter) => letter.toUpperCase()),
+    } satisfies AuthUser,
   };
 }
 
 export async function logout() {
-  const { removeAccessToken } = await import("@/services/auth-storage");
+  const { removeAccessToken } = await import("@/features/auth/services/auth-storage");
 
   removeAccessToken();
 }

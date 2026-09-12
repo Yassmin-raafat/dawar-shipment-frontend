@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import QueryProvider from "@/lib/query-provider";
-import AuthInitializer from "@/features/auth/auth-initializer";
+import AuthInitializer from "@/features/auth/components/auth-initializer";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
