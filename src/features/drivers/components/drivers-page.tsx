@@ -13,6 +13,7 @@ export default function DriversPage() {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddDriverOpen, setIsAddDriverOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   const { data: drivers = [], isError, isLoading } = useDrivers();
 
   const filteredDrivers = useMemo(() => {
@@ -45,12 +46,13 @@ export default function DriversPage() {
   return (
     <div className="mx-3 mb-3 flex min-h-[calc(100vh-92px)] flex-col rounded-xl bg-card px-5 py-5">
       <DriversToolbar
-        onAddDriverClick={() => setIsAddDriverOpen(true)}
+        onAddDriverClick={() => { setSuccessMessage(""); setIsAddDriverOpen(true); }}
         onSearchChange={handleSearchChange}
         searchValue={searchQuery}
       />
 
-      {isAddDriverOpen ? <DriverModal onClose={() => setIsAddDriverOpen(false)} /> : null}
+      {successMessage && <p role="status" className="mt-3 text-xs text-success">{successMessage}</p>}
+      {isAddDriverOpen ? <DriverModal onClose={() => setIsAddDriverOpen(false)} onSuccess={(driver) => setSuccessMessage(driver.name + " was added successfully.")} /> : null}
 
       <section className="mt-7 flex flex-1 flex-col">
         {isLoading ? <DriversTableSkeleton rows={PAGE_SIZE} /> : null}

@@ -1,5 +1,7 @@
 import type { DataTableColumn } from "@/components/ui/data-table";
 import type { Driver } from "@/features/drivers/types/driver";
+import Image from "next/image";
+import Link from "next/link";
 
 function getInitials(name: string) {
   return name
@@ -22,11 +24,11 @@ export const driverColumns: DataTableColumn<Driver>[] = [
     header: "Driver Profile",
     cell: (driver) => (
       <div className="flex items-center gap-3">
-        <div className="grid size-9 shrink-0 place-items-center rounded-full bg-primary-muted text-[13px] font-semibold text-primary">
+        {driver.avatarUrl ? <Image src={driver.avatarUrl} alt={driver.name} width={36} height={36} unoptimized className="size-9 shrink-0 rounded-full object-cover" /> : <div className="grid size-9 shrink-0 place-items-center rounded-full bg-primary-muted text-[13px] font-semibold text-primary">
           {getInitials(driver.name)}
-        </div>
+        </div>}
         <div>
-          <p className="font-semibold text-text-primary">{driver.name}</p>
+          <Link href={"/drivers/" + encodeURIComponent(driver.id)} className="font-semibold text-text-primary hover:text-primary focus-visible:outline-primary">{driver.name}</Link>
           <p className="mt-1 text-[10px] text-text-muted">{driver.id}</p>
         </div>
       </div>

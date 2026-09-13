@@ -1,8 +1,34 @@
 import type { Driver } from "@/features/drivers/types/driver";
+import { addDriverSchema, type AddDriverPayload } from "@/features/drivers/schemas/add-driver-schema";
 
 const drivers: Driver[] = [
   {
     id: "DRV-001",
+    vehiclePhotoUrl: "/image%20296.png",
+    role: "Senior Fleet Courier",
+    hub: "Cairo Hub 4 (East Depot)",
+    email: "ahmed.hassan@example.com",
+    licenseClass: "Commercial Class A",
+    vehicleColor: "Blue",
+    plateNumber: "ج ن ا | ٤٩٢١",
+    activeShipment: {
+      recipient: "Zeyad Waleed", origin: "Nasr City DC",
+      destination: "5th Settlement Hub", fee: 180, progress: 51,
+    },
+    recentDeliveries: [
+      { id: "EG-38291-MAA", origin: "Cairo Hub 4", destination: "Maadi Degla", fee: 220, status: "Delivered" },
+      { id: "EG-38104-HEL", origin: "Cairo Hub 4", destination: "Heliopolis Roxy", fee: 140, status: "Delivered" },
+      { id: "EG-37980-GIZ", origin: "Cairo Hub 4", destination: "Giza Dokki", fee: 195, status: "Delivered" },
+      { id: "EG-37825-NAS", origin: "Cairo Hub 4", destination: "Nasr City", fee: 160, status: "Delivered" },
+    ],
+    shiftActivity: [
+      { id: "checkpoint", activity: "Checkpoint Clearance", location: "Ring Road East", time: "10:50 AM" },
+      { id: "departure-4", activity: "Departed Hub", location: "Cairo Hub 4", time: "09:40 AM" },
+      { id: "departure-3", activity: "Departed Hub", location: "Cairo Hub 4", time: "09:40 AM" },
+      { id: "departure-2", activity: "Departed Hub", location: "Cairo Hub 4", time: "09:40 AM" },
+      { id: "departure-1", activity: "Departed Hub", location: "Cairo Hub 4", time: "09:40 AM" },
+      { id: "start", activity: "Shift Started", location: "Inspection Completed", time: "08:30 AM" },
+    ],
     name: "Ahmed Hassan",
     phone: "+20 100 234 5678",
     vehicle: "Mercedes Sprinter",
@@ -168,5 +194,57 @@ export async function getDrivers() {
     setTimeout(resolve, 500);
   });
 
-  return drivers;
+  return [...drivers];
+}
+
+function readPhoto(file?: File): Promise<string | undefined> {
+  if (!file) return Promise.resolve(undefined);
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(new Error("Could not read the photo. Please choose it again."));
+    reader.readAsDataURL(file);
+  });
+}
+
+export class DriverNotFoundError extends Error {
+  constructor() {
+    super("Driver not found.");
+    this.name = "DriverNotFoundError";
+  }
+}
+
+export async function getDriverById(id: string): Promise<Driver> {
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  const driver = drivers.find((item) => item.id === id);
+  if (!driver) throw new DriverNotFoundError();
+  return driver;
+}
+
+// In-memory mock: new drivers remain available to refetches until a full reload.
+export async function addDriver(payload: AddDriverPayload): Promise<Driver> {
+  const values = addDriverSchema.parse(payload);
+  await new Promise((resolve) => setTimeout(resolve, 700));
+  const [avatarUrl, vehiclePhotoUrl] = await Promise.all([
+    readPhoto(values.driverPhoto), readPhoto(values.vehiclePhoto),
+  ]);
+  if (drivers.some((driver) => driver.nationalId === values.nationalId)) {
+    throw new Error("A driver with this National ID / License already exists.");
+  }
+  const driver: Driver = {
+    id: "DRV-" + String(drivers.length + 1).padStart(3, "0"),
+    name: values.name,
+    phone: values.phone,
+    vehicle: values.vehicle,
+    nationalId: values.nationalId,
+    hub: values.hub,
+    plateNumber: values.plateNumber,
+    vehicleColor: values.vehicleColor,
+    avatarUrl,
+    vehiclePhotoUrl,
+    rating: 0,
+    reliability: 0,
+  };
+  drivers.unshift(driver);
+  return driver;
 }
