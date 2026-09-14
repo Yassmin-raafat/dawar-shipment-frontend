@@ -1,5 +1,6 @@
 import type { Driver } from "@/features/drivers/types/driver";
-import { addDriverSchema, type AddDriverPayload } from "@/features/drivers/schemas/add-driver-schema";
+import { getAssignedShipments } from "@/services/shipments-api";
+import { addDriverSchema, updateDriverSchema, type AddDriverPayload } from "@/features/drivers/schemas/add-driver-schema";
 
 const drivers: Driver[] = [
   {
@@ -194,7 +195,7 @@ export async function getDrivers() {
     setTimeout(resolve, 500);
   });
 
-  return [...drivers];
+  return drivers.map((driver) => ({ ...driver, assignedShipments: getAssignedShipments(driver.id) }));
 }
 
 function readPhoto(file?: File): Promise<string | undefined> {
@@ -218,7 +219,7 @@ export async function getDriverById(id: string): Promise<Driver> {
   await new Promise((resolve) => setTimeout(resolve, 500));
   const driver = drivers.find((item) => item.id === id);
   if (!driver) throw new DriverNotFoundError();
-  return driver;
+  return { ...driver, assignedShipments: getAssignedShipments(id) };
 }
 
 // In-memory mock: new drivers remain available to refetches until a full reload.
@@ -247,4 +248,21 @@ export async function addDriver(payload: AddDriverPayload): Promise<Driver> {
   };
   drivers.unshift(driver);
   return driver;
+}
+
+export async function updateDriver(id: string, payload: AddDriverPayload): Promise<Driver> {
+  const values = updateDriverSchema.parse(payload);
+  await new Promise((resolve) => setTimeout(resolve, 700));
+  const [avatarUrl, vehiclePhotoUrl] = await Promise.all([readPhoto(values.driverPhoto), readPhoto(values.vehiclePhoto)]);
+  const index = drivers.findIndex((driver) => driver.id === id);
+  if (index === -1) throw new DriverNotFoundError();
+  if (values.nationalId && drivers.some((driver) => driver.id !== id && driver.nationalId === values.nationalId)) {
+    throw new Error("A driver with this National ID / License already exists.");
+  }
+  drivers[index] = {
+    ...drivers[index], name: values.name, phone: values.phone, nationalId: values.nationalId,
+    hub: values.hub, vehicle: values.vehicle, plateNumber: values.plateNumber, vehicleColor: values.vehicleColor,
+    avatarUrl: avatarUrl ?? drivers[index].avatarUrl, vehiclePhotoUrl: vehiclePhotoUrl ?? drivers[index].vehiclePhotoUrl,
+  };
+  return { ...drivers[index], assignedShipments: getAssignedShipments(id) };
 }

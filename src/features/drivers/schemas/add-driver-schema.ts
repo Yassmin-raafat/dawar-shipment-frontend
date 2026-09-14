@@ -24,6 +24,11 @@ export const addDriverSchema = z.object({
 });
 
 export type AddDriverPayload = z.infer<typeof addDriverSchema>;
+// Older mock records can have no license or plate recorded yet.
+export const updateDriverSchema = addDriverSchema.extend({
+  nationalId: z.string().trim(),
+  plateNumber: z.string().trim(),
+});
 export type AddDriverErrors = Partial<Record<keyof AddDriverPayload, string>>;
 
 export function getDriverFieldErrors(error: z.ZodError): AddDriverErrors {

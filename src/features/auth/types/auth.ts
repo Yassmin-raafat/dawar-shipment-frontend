@@ -3,19 +3,5 @@ export type AuthUser = {
   email: string;
 };
 
-export type SignupPayload = {
-  confirmPassword: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  password: string;
-  phone: string;
-  userRole: string;
-};
-
-export type LoginPayload = {
-  email: string;
-  password: string;
-  rememberMe: boolean;
-};
-
+export type { SignupValues as SignupPayload } from "@/features/auth/schemas/signup-schema";
+export type { LoginValues as LoginPayload } from "@/features/auth/schemas/login-schema";

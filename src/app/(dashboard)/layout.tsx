@@ -6,11 +6,11 @@ import ProtectedRoute from "@/features/auth/components/protected-route";
 export default function DashboardLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-background text-text-primary lg:flex">
+      <div className="flex h-dvh overflow-hidden bg-background text-text-primary">
         <AppSidebar />
-        <div className="min-w-0 flex-1">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <AppHeader />
-          {children}
+          <main className="min-h-0 flex-1 overflow-auto pb-3">{children}</main>
         </div>
       </div>
     </ProtectedRoute>

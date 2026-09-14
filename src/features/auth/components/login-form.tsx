@@ -1,7 +1,8 @@
 "use client";
 
 import DawarLogo from "@/components/ui/dawar-logo";
-import type { LoginPayload } from "@/features/auth/types/auth";
+import { loginSchema, type LoginValues } from "@/features/auth/schemas/login-schema";
+import { getFieldErrors, type FieldErrors } from "@/features/auth/schemas/field-errors";
 import InputField from "@/components/ui/input-field";
 import { useAuthStore } from "@/features/auth/stores/auth-store";
 import { login } from "@/features/auth/services/auth-api";
@@ -9,11 +10,7 @@ import { saveAccessToken, saveAuthUser } from "@/features/auth/services/auth-sto
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
-import { useMemo, useState } from "react";
-
-type LoginValues = LoginPayload;
-
-type LoginErrors = Partial<Record<keyof LoginValues, string>>;
+import { useRef, useState } from "react";
 
 const initialValues: LoginValues = {
   email: "",
@@ -21,27 +18,10 @@ const initialValues: LoginValues = {
   rememberMe: false,
 };
 
-function validateLogin(values: LoginValues) {
-  const errors: LoginErrors = {};
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  if (!values.email.trim()) {
-    errors.email = "Email is required.";
-  } else if (!emailPattern.test(values.email)) {
-    errors.email = "Enter a valid email address.";
-  }
-
-  if (!values.password) {
-    errors.password = "Password is required.";
-  }
-
-  return errors;
-}
-
 export default function LoginForm() {
   const router = useRouter();
   const [values, setValues] = useState(initialValues);
-  const [errors, setErrors] = useState<LoginErrors>({});
+  const [errors, setErrors] = useState<FieldErrors<LoginValues>>({});
   const [submitError, setSubmitError] = useState("");
   const [submitSuccess, setSubmitSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,26 +30,17 @@ export default function LoginForm() {
     (state) => state.setAuthenticated,
   );
 
-  const hasFieldErrors = useMemo(
-    () => Object.keys(errors).length > 0,
-    [errors],
-  );
+  const hasFieldErrors = Object.keys(errors).length > 0;
+  const validationAttempted = useRef(false);
+  const submitting = useRef(false);
 
-  function updateValue(
-    name: keyof LoginValues,
-    value: string | boolean,
-  ) {
-    setValues((current) => ({
-      ...current,
-      [name]: value,
-    }));
-
-    setErrors((current) => {
-      const nextErrors = { ...current };
-      delete nextErrors[name];
-      return nextErrors;
-    });
-
+  function updateValue<K extends keyof LoginValues>(name: K, value: LoginValues[K]) {
+    const nextValues = { ...values, [name]: value };
+    setValues(nextValues);
+    if (validationAttempted.current) {
+      const result = loginSchema.safeParse(nextValues);
+      setErrors(result.success ? {} : getFieldErrors(result.error));
+    }
     setSubmitError("");
     setSubmitSuccess("");
   }
@@ -79,20 +50,22 @@ export default function LoginForm() {
   ) {
     event.preventDefault();
 
-    const nextErrors = validateLogin(values);
-    setErrors(nextErrors);
-
-    if (Object.keys(nextErrors).length > 0) {
+    if (submitting.current) return;
+    validationAttempted.current = true;
+    const result = loginSchema.safeParse(values);
+    setErrors(result.success ? {} : getFieldErrors(result.error));
+    if (!result.success) {
       setSubmitError("Please fix the highlighted fields.");
       return;
     }
 
+    submitting.current = true;
     setIsSubmitting(true);
     setSubmitError("");
     setSubmitSuccess("");
 
     try {
-      const response = await login(values);
+      const response = await login(result.data);
 
       saveAccessToken(response.token);
       saveAuthUser(response.user);
@@ -102,11 +75,10 @@ export default function LoginForm() {
       router.push("/drivers");
     } catch (error) {
       setSubmitError(
-    error instanceof Error
-      ? error.message
-      : "Login failed. Try again.",
+        error instanceof Error ? error.message : "Login failed. Try again.",
       );
     } finally {
+      submitting.current = false;
       setIsSubmitting(false);
     }
   }

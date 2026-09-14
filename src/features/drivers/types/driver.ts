@@ -1,3 +1,5 @@
+import type { Shipment } from "@/features/shipments/types/shipment";
+
 export type DriverShipment = {
   recipient: string;
   origin: string;
@@ -38,6 +40,7 @@ export type Driver = {
   email?: string;
   licenseClass?: string;
   activeShipment?: DriverShipment;
+  assignedShipments?: Shipment[];
   recentDeliveries?: DriverDelivery[];
   shiftActivity?: DriverActivity[];
 };

@@ -21,10 +21,9 @@ export default function DataTable<TData>({
   getRowKey,
 }: DataTableProps<TData>) {
   return (
-    <div className="overflow-hidden bg-card">
-      <div className="overflow-x-auto">
+    <div className="bg-card">
         <table className="min-w-full border-collapse">
-          <thead className="bg-background">
+          <thead className="sticky top-0 z-10 bg-background">
             <tr>
               {columns.map((column) => (
                 <th
@@ -71,7 +70,6 @@ export default function DataTable<TData>({
             )}
           </tbody>
         </table>
-      </div>
     </div>
   );
 }

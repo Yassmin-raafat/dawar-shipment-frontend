@@ -6,7 +6,7 @@ type DriversToolbarProps = {
 
 export default function DriversToolbar({ onAddDriverClick, onSearchChange, searchValue }: DriversToolbarProps) {
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+    <div className="flex shrink-0 flex-col gap-4 sm:flex-row sm:items-center">
       <div className="relative min-w-0 flex-1">
         <label className="sr-only" htmlFor="driversSearch">Search drivers</label>
         <svg aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg>

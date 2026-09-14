@@ -3,7 +3,8 @@ import DriverDetailsPage from "@/features/drivers/components/driver-details-page
 
 export const metadata: Metadata = { title: "Driver Details | Dawar Parcel" };
 
-export default async function DriverDetailsRoute({ params }: { params: Promise<{ id: string }> }) {
+export default async function DriverDetailsRoute({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ assignShipment?: string; edit?: string }> }) {
   const { id } = await params;
-  return <DriverDetailsPage id={id} />;
+  const { assignShipment, edit } = await searchParams;
+  return <DriverDetailsPage key={`${id}:${assignShipment === "true"}:${edit === "true"}`} id={id} initialAssignShipmentOpen={assignShipment === "true"} initialEditOpen={edit === "true" && assignShipment !== "true"} />;
 }

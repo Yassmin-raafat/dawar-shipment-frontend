@@ -22,7 +22,7 @@ const navigationItems = [
 export default function AppSidebar() {
   const pathname = usePathname();
   return (
-    <aside className="hidden min-h-screen w-60 shrink-0 bg-sidebar px-5 py-10 lg:block">
+    <aside className="hidden min-h-0 w-60 shrink-0 overflow-y-auto bg-sidebar px-5 py-10 lg:block">
       <div className="px-3 [&_img]:h-auto [&_img]:w-28"><DawarLogo /></div>
 
       <nav className="mt-12 space-y-1" aria-label="Main navigation">

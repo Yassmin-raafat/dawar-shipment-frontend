@@ -44,30 +44,30 @@ export default function DriversPage() {
   }
 
   return (
-    <div className="mx-3 mb-3 flex min-h-[calc(100vh-92px)] flex-col rounded-xl bg-card px-5 py-5">
+    <div className="mx-3 flex h-full min-h-0 flex-col overflow-hidden rounded-xl bg-card px-5 py-5">
       <DriversToolbar
         onAddDriverClick={() => { setSuccessMessage(""); setIsAddDriverOpen(true); }}
         onSearchChange={handleSearchChange}
         searchValue={searchQuery}
       />
 
-      {successMessage && <p role="status" className="mt-3 text-xs text-success">{successMessage}</p>}
+      {successMessage && <p role="status" className="mt-3 shrink-0 text-xs text-success">{successMessage}</p>}
       {isAddDriverOpen ? <DriverModal onClose={() => setIsAddDriverOpen(false)} onSuccess={(driver) => setSuccessMessage(driver.name + " was added successfully.")} /> : null}
 
-      <section className="mt-7 flex flex-1 flex-col">
+      <section className="mt-7 flex min-h-0 flex-1 flex-col">
+        <div key={`${currentPage}:${searchQuery}`} role="region" aria-label="Drivers table" tabIndex={0} className="min-h-0 flex-1 overflow-auto overscroll-contain focus-visible:outline-primary">
         {isLoading ? <DriversTableSkeleton rows={PAGE_SIZE} /> : null}
 
         {isError ? (
-          <div className="rounded-[8px] border border-destructive/30 bg-destructive/5 px-5 py-10 text-center text-[14px] font-medium text-destructive">
+          <div role="alert" className="rounded-[8px] border border-destructive/30 bg-destructive/5 px-5 py-10 text-center text-[14px] font-medium text-destructive">
             Could not load drivers. Try again later.
           </div>
         ) : null}
 
+        {!isLoading && !isError ? <DriversTable drivers={paginatedDrivers} /> : null}
+        </div>
         {!isLoading && !isError ? (
-          <>
-            <DriversTable drivers={paginatedDrivers} />
-
-            <div className="mt-auto pt-6 flex flex-col gap-3 text-[11px] text-text-secondary sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex shrink-0 flex-col gap-3 pt-6 text-[11px] text-text-secondary sm:flex-row sm:items-center sm:justify-between">
               <p>
                 Showing {filteredDrivers.length === 0 ? 0 : startIndex + 1}–{startIndex + paginatedDrivers.length} of {filteredDrivers.length} drivers
                 {filteredDrivers.length !== drivers.length ? ` (filtered from ${drivers.length})` : ""}
@@ -94,7 +94,6 @@ export default function DriversPage() {
                 </button>
               </div>
             </div>
-          </>
         ) : null}
       </section>
     </div>

@@ -1,163 +1,61 @@
 "use client";
 
 import DawarLogo from "@/components/ui/dawar-logo";
-import type { SignupPayload } from "@/features/auth/types/auth";
+import { signupSchema, type SignupValues } from "@/features/auth/schemas/signup-schema";
+import { getFieldErrors, type FieldErrors } from "@/features/auth/schemas/field-errors";
+import { signupInitialValues, signupFields } from "@/features/auth/config/signup-fields";
 import InputField from "@/components/ui/input-field";
 import { signup } from "@/features/auth/services/auth-api";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useMemo, useState } from "react";
-
-type SignupValues = SignupPayload;
-
-type SignupErrors = Partial<Record<keyof SignupValues, string>>;
-
-type SignupField = {
-  id: keyof Omit<SignupValues, "userRole">;
-  label: string;
-  placeholder: string;
-  type: "email" | "password" | "tel" | "text";
-  icon?: "email" | "phone" | "password";
-};
-
-const initialValues: SignupValues = {
-  firstName: "",
-  lastName: "",
-  email: "",
-  phone: "",
-  password: "",
-  confirmPassword: "",
-  userRole: "delivery-agent",
-};
-
-const fields = [
-  {
-    id: "firstName",
-    label: "First Name",
-    placeholder: "Enter your first name",
-    type: "text",
-  },
-  {
-    id: "lastName",
-    label: "Last Name",
-    placeholder: "Enter your last name",
-    type: "text",
-  },
-  {
-    id: "email",
-    label: "Email ID",
-    placeholder: "Enter your email id",
-    type: "email",
-    icon: "email",
-  },
-  {
-    id: "phone",
-    label: "Phone Number",
-    placeholder: "Enter mobile number",
-    type: "tel",
-    icon: "phone",
-  },
-  {
-    id: "password",
-    label: "Password",
-    placeholder: "Enter your password",
-    type: "password",
-    icon: "password",
-  },
-  {
-    id: "confirmPassword",
-    label: "Confirm Password",
-    placeholder: "Enter your password",
-    type: "password",
-    icon: "password",
-  },
-] satisfies SignupField[];
-
-function validateSignup(values: SignupValues) {
-  const errors: SignupErrors = {};
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const phonePattern = /^[0-9+\-\s()]{8,}$/;
-
-  if (!values.firstName.trim()) {
-    errors.firstName = "First name is required.";
-  }
-
-  if (!values.lastName.trim()) {
-    errors.lastName = "Last name is required.";
-  }
-
-  if (!values.email.trim()) {
-    errors.email = "Email is required.";
-  } else if (!emailPattern.test(values.email)) {
-    errors.email = "Enter a valid email address.";
-  }
-
-  if (!values.phone.trim()) {
-    errors.phone = "Phone number is required.";
-  } else if (!phonePattern.test(values.phone)) {
-    errors.phone = "Enter a valid phone number.";
-  }
-
-  if (!values.password) {
-    errors.password = "Password is required.";
-  } else if (values.password.length < 8) {
-    errors.password = "Password must be at least 8 characters.";
-  }
-
-  if (!values.confirmPassword) {
-    errors.confirmPassword = "Confirm your password.";
-  } else if (values.confirmPassword !== values.password) {
-    errors.confirmPassword = "Passwords do not match.";
-  }
-
-  if (!values.userRole) {
-    errors.userRole = "Select a user role.";
-  }
-
-  return errors;
-}
+import { type FormEvent, useRef, useState } from "react";
 
 export default function SignupForm() {
   const router = useRouter();
-  const [values, setValues] = useState(initialValues);
-  const [errors, setErrors] = useState<SignupErrors>({});
+  const [values, setValues] = useState(signupInitialValues);
+  const [errors, setErrors] = useState<FieldErrors<SignupValues>>({});
   const [submitError, setSubmitError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const hasFieldErrors = useMemo(() => Object.keys(errors).length > 0, [errors]);
+  const hasFieldErrors = Object.keys(errors).length > 0;
+  const validationAttempted = useRef(false);
+  const submitting = useRef(false);
 
   function updateValue(name: keyof SignupValues, value: string) {
-    setValues((current) => ({ ...current, [name]: value }));
-    setErrors((current) => {
-      const nextErrors = { ...current };
-      delete nextErrors[name];
-      return nextErrors;
-    });
+    const nextValues = { ...values, [name]: value };
+    setValues(nextValues);
+    if (validationAttempted.current) {
+      const result = signupSchema.safeParse(nextValues);
+      setErrors(result.success ? {} : getFieldErrors(result.error));
+    }
     setSubmitError("");
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const nextErrors = validateSignup(values);
-    setErrors(nextErrors);
-
-    if (Object.keys(nextErrors).length > 0) {
+    if (submitting.current) return;
+    validationAttempted.current = true;
+    const result = signupSchema.safeParse(values);
+    setErrors(result.success ? {} : getFieldErrors(result.error));
+    if (!result.success) {
       setSubmitError("Please fix the highlighted fields.");
       return;
     }
 
+    submitting.current = true;
     setIsSubmitting(true);
     setSubmitError("");
 
     try {
-      await signup(values);
+      await signup(result.data);
       router.push("/login");
     } catch (error) {
       setSubmitError(
-    error instanceof Error ? error.message : "Signup failed. Try again.",
+        error instanceof Error ? error.message : "Signup failed. Try again.",
       );
     } finally {
+      submitting.current = false;
       setIsSubmitting(false);
     }
   }
@@ -207,7 +105,7 @@ export default function SignupForm() {
 
       <form className="space-y-5" noValidate onSubmit={handleSubmit}>
         <div className="grid gap-x-4 gap-y-5 sm:grid-cols-2">
-          {fields.map((field) => {
+          {signupFields.map((field) => {
             const error = errors[field.id];
 
             return (

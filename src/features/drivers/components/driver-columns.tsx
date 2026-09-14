@@ -2,6 +2,7 @@ import type { DataTableColumn } from "@/components/ui/data-table";
 import type { Driver } from "@/features/drivers/types/driver";
 import Image from "next/image";
 import Link from "next/link";
+import DriverActions from "@/features/drivers/components/driver-actions";
 
 function getInitials(name: string) {
   return name
@@ -58,13 +59,6 @@ export const driverColumns: DataTableColumn<Driver>[] = [
     key: "actions",
     header: "Actions",
     className: "w-20 text-center",
-    cell: (driver) => (
-      <details className="relative">
-        <summary aria-label={"Actions for " + driver.name} className="cursor-pointer list-none text-text-muted [&::-webkit-details-marker]:hidden">•••</summary>
-        <div className="absolute right-0 z-10 w-44 rounded-lg border border-border bg-card p-3 text-left shadow-lg">
-          <a className="text-primary" href={"tel:" + driver.phone.replace(/\s/g, "")}>Call driver</a>
-        </div>
-      </details>
-    ),
+    cell: (driver) => <DriverActions driver={driver} />,
   },
 ];

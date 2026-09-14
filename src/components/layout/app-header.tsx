@@ -16,7 +16,7 @@ export default function AppHeader() {
   }
 
   return (
-    <header className="flex h-20 items-center justify-end gap-3 px-5 sm:px-7">
+    <header className="flex h-20 shrink-0 items-center justify-end gap-3 px-5 sm:px-7">
       <details className="relative">
         <summary aria-label="Notifications" className="grid size-9 cursor-pointer list-none place-items-center rounded-full border border-border/60 bg-card text-text-muted [&::-webkit-details-marker]:hidden">
           <svg aria-hidden="true" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4M12 2V0" /></svg>
