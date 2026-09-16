@@ -34,10 +34,6 @@ export function getAuthUser(): AuthUser | null {
 }
 
 // Mock profile lookup until the API supplies the authenticated user's name.
-export function saveMockProfileName(email: string, name: string) {
-  localStorage.setItem("dawar_mock_profile:" + email.trim().toLowerCase(), name);
-}
-
 export function getMockProfileName(email: string) {
   return localStorage.getItem("dawar_mock_profile:" + email.trim().toLowerCase());
 }

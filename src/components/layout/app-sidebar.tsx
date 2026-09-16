@@ -41,6 +41,7 @@ export default function AppSidebar() {
               {item.href === "/shipments" ? <path d="m12 3 8 4v10l-8 4-8-4V7l8-4Zm0 9 8-5M12 12 4 7m8 5v9M8 5l8 4" /> : item.href === "/drivers" ? <><circle cx="10" cy="6" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3m2-9 2 2 3-4"/></> : <path d="M4 4h16v13H9l-5 4V4Z" />}
             </svg>
             {item.label}
+            {item.href === "/messages" && <span aria-label="4 new messages" className="ml-auto grid size-4 place-items-center rounded-full bg-primary text-[9px] font-medium text-primary-foreground">4</span>}
           </Link>
         ))}
       </nav>

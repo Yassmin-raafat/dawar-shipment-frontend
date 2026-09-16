@@ -91,19 +91,6 @@ export default function LoginForm() {
         <h1 className="text-[29px] font-bold leading-tight tracking-normal text-text-primary">
           Welcome Back!
         </h1>
-
-        <p className="mt-3 text-[14px] leading-[1.45] text-text-secondary">
-          Don&apos;t have an account?{" "}
-          <Link
-            className="font-semibold text-primary underline"
-            href="/signup"
-          >
-            Create a new account now
-          </Link>
-          , it&apos;s FREE!
-          <br />
-          Takes less than a minute.
-        </p>
       </div>
 
       {submitError ? (
