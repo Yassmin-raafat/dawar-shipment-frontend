@@ -4,6 +4,7 @@ import QueryProvider from "@/lib/query-provider";
 import AuthInitializer from "@/features/auth/components/auth-initializer";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
+import { NextIntlClientProvider } from "next-intl";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,11 +31,13 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <QueryProvider>
-          <AuthInitializer />
-          {children}
-          <Toaster position="bottom-right" richColors closeButton />
-        </QueryProvider>
+        <NextIntlClientProvider>
+          <QueryProvider>
+            <AuthInitializer />
+            {children}
+            <Toaster position="bottom-right" richColors closeButton />
+          </QueryProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

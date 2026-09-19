@@ -27,6 +27,10 @@ export default function DriverDetailsPage({ id, initialAssignShipmentOpen = fals
   </section>;
 
   return <div className="mx-3 mb-6 space-y-4 text-text-primary">
+    <Link href="/drivers" className="inline-flex h-8 items-center gap-2 rounded-xl border border-border/60 bg-card px-3 text-[10px] font-medium text-text-secondary hover:bg-secondary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+      <svg aria-hidden="true" className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="m12 5-7 7 7 7M5 12h14" /></svg>
+      Back to Drivers
+    </Link>
     <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-card px-5 py-5">
       <div className="flex min-w-0 items-center gap-3">
         {driver.avatarUrl ? <Image unoptimized src={driver.avatarUrl} alt={driver.name} width={48} height={48} className="size-12 rounded-full object-cover"/> : <div aria-hidden="true" className="grid size-12 shrink-0 place-items-center rounded-full bg-primary-muted text-sm font-semibold text-primary">{driver.name.split(" ").map((part) => part[0]).join("").slice(0, 2)}</div>}

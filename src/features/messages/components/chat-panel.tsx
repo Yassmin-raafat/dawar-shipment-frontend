@@ -6,9 +6,14 @@ import { useMessages } from "@/features/messages/hooks/use-messages";
 import { useEffect, useRef } from "react";
 
 export default function ChatPanel({ conversation, onBack }: { conversation: Conversation; onBack: () => void }) {
-  const query = useMessages(conversation.id);
+  const {
+    data: messages = [],
+    error: messagesError,
+    isLoading: isMessagesLoading,
+    refetch: refetchMessages,
+  } = useMessages(conversation.id);
   const historyRef = useRef<HTMLDivElement>(null);
-  const lastMessageId = query.data?.at(-1)?.id;
+  const lastMessageId = messages.at(-1)?.id;
   useEffect(() => {
     const history = historyRef.current;
     if (history) history.scrollTop = history.scrollHeight;
@@ -22,9 +27,9 @@ export default function ChatPanel({ conversation, onBack }: { conversation: Conv
     </header>
     <div ref={historyRef} key={`history-${conversation.id}`} role="region" aria-label="Message history" tabIndex={0} className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-6 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/20 sm:px-5">
       <p className="py-8 text-center text-[9px] text-[#91a3bd]">{conversation.dateLabel}</p>
-      {query.isPending ? <div role="status" aria-label="Loading messages" className="space-y-7"><div aria-hidden="true" className="h-16 w-3/4 animate-pulse rounded-2xl bg-secondary motion-reduce:animate-none"/><div aria-hidden="true" className="ml-auto h-16 w-3/4 animate-pulse rounded-2xl bg-primary-muted motion-reduce:animate-none"/></div>
-        : query.isError ? <div role="alert" className="py-5 text-center text-xs text-destructive">{query.error.message}<button type="button" onClick={() => void query.refetch()} className="mx-auto mt-3 block text-primary underline">Retry messages</button></div>
-        : query.data.length ? <ol className="space-y-7">{query.data.map((message) => <MessageBubble key={message.id} message={message} conversation={conversation} />)}</ol>
+      {isMessagesLoading ? <div role="status" aria-label="Loading messages" className="space-y-7"><div aria-hidden="true" className="h-16 w-3/4 animate-pulse rounded-2xl bg-secondary motion-reduce:animate-none"/><div aria-hidden="true" className="ml-auto h-16 w-3/4 animate-pulse rounded-2xl bg-primary-muted motion-reduce:animate-none"/></div>
+        : messagesError ? <div role="alert" className="py-5 text-center text-xs text-destructive">{messagesError.message}<button type="button" onClick={() => void refetchMessages()} className="mx-auto mt-3 block text-primary underline">Retry messages</button></div>
+        : messages.length ? <ol className="space-y-7">{messages.map((message) => <MessageBubble key={message.id} message={message} conversation={conversation} />)}</ol>
         : <p role="status" className="py-5 text-center text-xs text-text-secondary">No messages yet. Start the conversation below.</p>}
     </div>
     <MessageInput conversationId={conversation.id} recipient={conversation.name} />

@@ -1,4 +1,6 @@
 import { mockConversations } from "@/features/messages/data/mock-conversations";
+import { mockChatUsers } from "@/features/messages/data/mock-chat-users";
+import type { ChatUser } from "@/features/messages/types/chat-user";
 import type { Conversation, Message } from "@/features/messages/types/message";
 
 // The service owns session-local data. Query results are copies, never the store.
@@ -25,6 +27,25 @@ export async function getConversations(): Promise<Conversation[]> {
     void messages;
     return { ...summary };
   });
+}
+
+export async function getChatUsers(): Promise<ChatUser[]> {
+  await wait();
+  return mockChatUsers.map((user) => ({ ...user }));
+}
+
+export async function createConversation(userId: string): Promise<Conversation> {
+  await wait(600);
+  const user = mockChatUsers.find((item) => item.id === userId);
+  if (!user) throw new Error("User not found. Please select another user.");
+  let conversation = conversations.find((item) => item.id === userId);
+  if (!conversation) {
+    conversation = { ...user, preview: "No messages yet.", timestamp: "Just now", unreadCount: 0, dateLabel: "Today", messages: [] };
+    conversations.unshift(conversation);
+  }
+  const { messages, ...summary } = conversation;
+  void messages;
+  return { ...summary };
 }
 
 export async function getMessages(conversationId: string): Promise<Message[]> {

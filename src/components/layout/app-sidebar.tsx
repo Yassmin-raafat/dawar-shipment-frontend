@@ -3,24 +3,26 @@
 import { usePathname } from "next/navigation";
 import DawarLogo from "@/components/ui/dawar-logo";
 import Link from "next/link";
-
-const navigationItems = [
-  {
-    href: "/shipments",
-    label: "Orders",
-  },
-  {
-    href: "/drivers",
-    label: "Drivers",
-  },
-  {
-    href: "/messages",
-    label: "Messages",
-  },
-];
+import { useTranslations } from "next-intl";
 
 export default function AppSidebar() {
   const pathname = usePathname();
+  const t = useTranslations("Navigation");
+  const navigationItems = [
+    {
+      href: "/shipments",
+      label: "Orders",
+    },
+    {
+      href: "/drivers",
+      label: "Drivers",
+    },
+    {
+      href: "/messages",
+      label: t("messages"),
+    },
+  ];
+
   return (
     <aside className="hidden min-h-0 w-60 shrink-0 overflow-y-auto bg-sidebar px-5 py-10 lg:block">
       <div className="px-3 [&_img]:h-auto [&_img]:w-28"><DawarLogo /></div>
