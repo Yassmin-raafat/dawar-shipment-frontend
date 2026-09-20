@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
 import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 const initialValues: LoginValues = {
   email: "",
@@ -19,6 +20,7 @@ const initialValues: LoginValues = {
 };
 
 export default function LoginForm() {
+  const t = useTranslations("auth");
   const router = useRouter();
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState<FieldErrors<LoginValues>>({});
@@ -33,13 +35,17 @@ export default function LoginForm() {
   const hasFieldErrors = Object.keys(errors).length > 0;
   const validationAttempted = useRef(false);
   const submitting = useRef(false);
+  function translateError(message?: string) {
+    const keys: Record<string, string> = { "Email is required.": "emailRequired", "Enter a valid email address.": "emailInvalid", "Password is required.": "passwordRequired", "Invalid email or password.": "invalidCredentials" };
+    return message && keys[message] ? t(keys[message]) : message;
+  }
 
   function updateValue<K extends keyof LoginValues>(name: K, value: LoginValues[K]) {
     const nextValues = { ...values, [name]: value };
     setValues(nextValues);
     if (validationAttempted.current) {
       const result = loginSchema.safeParse(nextValues);
-      setErrors(result.success ? {} : getFieldErrors(result.error));
+      setErrors(result.success ? {} : Object.fromEntries(Object.entries(getFieldErrors(result.error)).map(([key, value]) => [key, translateError(value)])) as FieldErrors<LoginValues>);
     }
     setSubmitError("");
     setSubmitSuccess("");
@@ -53,9 +59,10 @@ export default function LoginForm() {
     if (submitting.current) return;
     validationAttempted.current = true;
     const result = loginSchema.safeParse(values);
-    setErrors(result.success ? {} : getFieldErrors(result.error));
+      const fieldErrors = result.success ? {} : getFieldErrors(result.error);
+      setErrors(Object.fromEntries(Object.entries(fieldErrors).map(([key, value]) => [key, translateError(value)])) as FieldErrors<LoginValues>);
     if (!result.success) {
-      setSubmitError("Please fix the highlighted fields.");
+      setSubmitError(t("fixFields"));
       return;
     }
 
@@ -71,11 +78,11 @@ export default function LoginForm() {
       saveAuthUser(response.user);
       setAuthenticated(true, response.user);
 
-      setSubmitSuccess(response.message);
+      setSubmitSuccess(t("success"));
       router.push("/drivers");
     } catch (error) {
       setSubmitError(
-        error instanceof Error ? error.message : "Login failed. Try again.",
+        error instanceof Error ? (translateError(error.message) ?? t("loginFailed")) : t("loginFailed"),
       );
     } finally {
       submitting.current = false;
@@ -89,7 +96,7 @@ export default function LoginForm() {
 
       <div className="mt-16 sm:mt-20">
         <h1 className="text-[29px] font-bold leading-tight tracking-normal text-text-primary">
-          Welcome Back!
+          {t("welcome")}
         </h1>
       </div>
 
@@ -126,11 +133,11 @@ export default function LoginForm() {
           error={errors.email}
           icon="email"
           id="email"
-          label="Email Address"
+          label={t("email")}
           onChange={(event) =>
             updateValue("email", event.target.value)
           }
-          placeholder="Enter your email"
+          placeholder={t("emailPlaceholder")}
           type="email"
           value={values.email}
           variant="underline"
@@ -140,11 +147,11 @@ export default function LoginForm() {
           error={errors.password}
           icon="password"
           id="password"
-          label="Password"
+          label={t("password")}
           onChange={(event) =>
             updateValue("password", event.target.value)
           }
-          placeholder="Enter your password"
+          placeholder={t("passwordPlaceholder")}
           type="password"
           value={values.password}
           variant="underline"
@@ -160,16 +167,16 @@ export default function LoginForm() {
               }
               type="checkbox"
             />
-            Remember me
+            {t("rememberMe")}
           </label>
 
           <p>
-            Forgot password?{" "}
+            {t("forgotPassword")} {" "}
             <Link
               className="font-semibold text-primary"
               href="/forgot-password"
             >
-              Click here
+              {t("clickHere")}
             </Link>
           </p>
         </div>
@@ -180,7 +187,7 @@ export default function LoginForm() {
             disabled={isSubmitting}
             type="submit"
           >
-            {isSubmitting ? "Logging in..." : "Login Now"}
+            {isSubmitting ? t("loggingIn") : t("login")}
           </button>
 
           <button
@@ -190,7 +197,7 @@ export default function LoginForm() {
             <span className="text-[18px] font-semibold text-[#4285F4]">
               G
             </span>
-            Login with Google
+            {t("googleLogin")}
           </button>
         </div>
       </form>

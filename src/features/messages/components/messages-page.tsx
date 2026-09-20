@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useState } from "react";
 import { useConversations } from "@/features/messages/hooks/use-conversations";
 import ConversationsList from "./conversations-list";
@@ -7,6 +9,7 @@ import ChatPanel from "./chat-panel";
 import NewChatModal from "./new-chat-modal";
 
 export default function MessagesPage() {
+  const t = useTranslations("messages");
   const {
     data: conversations = [],
     error: conversationsError,
@@ -26,7 +29,7 @@ export default function MessagesPage() {
       <ConversationsList conversations={visible} selectedId={selected?.id ?? ""} search={search} onSearch={setSearch} onSelect={(id) => { setSelectedId(id); setShowChat(true); }} onNewChat={() => setIsNewChatOpen(true)} isLoading={isConversationsLoading} error={conversationsError?.message} onRetry={() => void refetchConversations()} hasConversations={conversations.length > 0} />
     </div>
     <div className={"min-h-0 min-w-0 " + (showChat ? "" : "hidden md:block")}>
-      {selected ? <ChatPanel conversation={selected} onBack={() => setShowChat(false)} /> : <div role="status" className="flex h-full items-center justify-center rounded-2xl bg-[#fbfcfd] px-6 text-center text-xs text-text-secondary">{isConversationsLoading ? "Loading conversations..." : conversationsError ? "Conversations are unavailable. Please retry." : "No conversations yet."}</div>}
+      {selected ? <ChatPanel conversation={selected} onBack={() => setShowChat(false)} /> : <div role="status" className="flex h-full items-center justify-center rounded-2xl bg-[#fbfcfd] px-6 text-center text-xs text-text-secondary">{isConversationsLoading ? t("loadingConversations") : conversationsError ? t("conversationsUnavailable") : t("noConversations")}</div>}
     </div>
     {isNewChatOpen && <NewChatModal onClose={() => setIsNewChatOpen(false)} onSuccess={(conversation) => { setSelectedId(conversation.id); setSearch(""); setShowChat(true); }} />}
   </div>;

@@ -6,10 +6,12 @@ import DriversTable from "@/features/drivers/components/drivers-table";
 import DriversToolbar from "@/features/drivers/components/drivers-toolbar";
 import { useDrivers } from "@/features/drivers/hooks/use-drivers";
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 const PAGE_SIZE = 10;
 
 export default function DriversPage() {
+  const t = useTranslations("drivers");
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddDriverOpen, setIsAddDriverOpen] = useState(false);
@@ -55,12 +57,12 @@ export default function DriversPage() {
       {isAddDriverOpen ? <DriverModal onClose={() => setIsAddDriverOpen(false)} onSuccess={(driver) => setSuccessMessage(driver.name + " was added successfully.")} /> : null}
 
       <section className="mt-7 flex min-h-0 flex-1 flex-col">
-        <div key={`${currentPage}:${searchQuery}`} role="region" aria-label="Drivers table" tabIndex={0} className="min-h-0 flex-1 overflow-auto overscroll-contain focus-visible:outline-primary">
+        <div key={`${currentPage}:${searchQuery}`} role="region" aria-label={t("table")} tabIndex={0} className="min-h-0 flex-1 overflow-auto overscroll-contain focus-visible:outline-primary">
         {isLoading ? <DriversTableSkeleton rows={PAGE_SIZE} /> : null}
 
         {isError ? (
           <div role="alert" className="rounded-[8px] border border-destructive/30 bg-destructive/5 px-5 py-10 text-center text-[14px] font-medium text-destructive">
-            Could not load drivers. Try again later.
+            {t("loadError")}
           </div>
         ) : null}
 
@@ -69,8 +71,8 @@ export default function DriversPage() {
         {!isLoading && !isError ? (
             <div className="flex shrink-0 flex-col gap-3 pt-6 text-[11px] text-text-secondary sm:flex-row sm:items-center sm:justify-between">
               <p>
-                Showing {filteredDrivers.length === 0 ? 0 : startIndex + 1}–{startIndex + paginatedDrivers.length} of {filteredDrivers.length} drivers
-                {filteredDrivers.length !== drivers.length ? ` (filtered from ${drivers.length})` : ""}
+                {t("showing", { from: filteredDrivers.length === 0 ? 0 : startIndex + 1, to: startIndex + paginatedDrivers.length, total: filteredDrivers.length })}
+                {filteredDrivers.length !== drivers.length ? t("filteredFrom", { total: drivers.length }) : ""}
               </p>
               <div className="flex items-center gap-2">
                 <button
@@ -79,7 +81,7 @@ export default function DriversPage() {
                   onClick={() => setPage(currentPage - 1)}
                   type="button"
                 >
-                  Previous
+                  {t("previous")}
                 </button>
                 <span className="grid h-9 min-w-9 place-items-center rounded-[8px] bg-primary text-[13px] font-semibold text-primary-foreground">
                   {currentPage}
@@ -90,7 +92,7 @@ export default function DriversPage() {
                   onClick={() => setPage(currentPage + 1)}
                   type="button"
                 >
-                  Next
+                  {t("next")}
                 </button>
               </div>
             </div>

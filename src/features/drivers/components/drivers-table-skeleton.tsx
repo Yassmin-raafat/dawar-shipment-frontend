@@ -1,7 +1,10 @@
 import DataTable, { type DataTableColumn } from "@/components/ui/data-table";
-import { driverColumns } from "@/features/drivers/components/driver-columns";
+import { useDriverColumns } from "@/features/drivers/components/driver-columns";
+import { useTranslations } from "next-intl";
 
-const skeletonColumns: DataTableColumn<number>[] = driverColumns.map((column) => ({
+function useSkeletonColumns(): DataTableColumn<number>[] {
+  const driverColumns = useDriverColumns();
+  return driverColumns.map((column) => ({
   key: column.key,
   header: column.header,
   className: column.className,
@@ -16,11 +19,14 @@ const skeletonColumns: DataTableColumn<number>[] = driverColumns.map((column) =>
   ) : (
     <div className="h-4 w-full min-w-16 rounded bg-secondary" />
   ),
-}));
+  }));
+}
 
 export default function DriversTableSkeleton({ rows }: { rows: number }) {
+  const t = useTranslations("drivers");
+  const skeletonColumns = useSkeletonColumns();
   return (
-    <div role="status" aria-label="Loading drivers">
+    <div role="status" aria-label={t("searchLabel")}>
       <div aria-hidden="true" className="animate-pulse motion-reduce:animate-none">
         <DataTable columns={skeletonColumns} data={Array.from({ length: rows }, (_, i) => i)} getRowKey={String} />
       </div>
