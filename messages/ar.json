@@ -95,7 +95,7 @@
     "fleetCourier": "مندوب توصيل",
     "hubMissing": "لم يُحدد مركز",
     "assign": "إسناد شحنة",
-    "options": "خيارات السائق",
+    "options": "خيارات السائق", "edit": "تعديل السائق",
     "emailMissing": "البريد الإلكتروني غير مسجل",
     "licenseMissing": "فئة الرخصة غير مسجلة",
     "assignedShipments": "الشحنات المسندة",
@@ -228,5 +228,10 @@
     "Arctic White": "أبيض قطبي",
     "Black": "أسود",
     "Silver": "فضي"
+  },
+  "orders": {
+    "title": "الطلبات", "subtitle": "تتبع شحناتك وأدر عمليات التسليم", "search": "البحث في الطلبات", "searchPlaceholder": "ابحث بالرقم أو السائق أو نقطة الانطلاق أو الوجهة", "filter": "تصفية الطلبات", "mapLabel": "خريطة مسار الطلب", "orderDetails": "تفاصيل الطلب", "recipient": "المستلم", "driver": "السائق", "pickup": "الاستلام", "delivery": "وجهة التسليم", "baseFee": "رسوم الشحن الأساسية", "tax": "الضريبة", "totalFee": "إجمالي رسوم التسليم", "driverDetails": "تفاصيل السائق", "loadError": "تعذر تحميل الطلبات", "retry": "إعادة المحاولة", "empty": "لا توجد طلبات", "noResults": "لا توجد طلبات تطابق بحثك.",
+    "summary": { "total": "إجمالي الطلبات", "delivered": "الطلبات المسلّمة", "pending": "الطلبات المعلّقة", "inTransit": "الطلبات قيد التوصيل" },
+    "status": { "Delivered": "تم التسليم", "Pending": "معلّق", "In Transit": "قيد التوصيل" }
   }
 }

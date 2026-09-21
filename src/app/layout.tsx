@@ -6,6 +6,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale } from "next-intl/server";
+import ThemeProvider from "@/components/providers/theme-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,16 +32,19 @@ export default async function RootLayout({
     <html
       lang={locale}
       dir={locale === "ar" ? "rtl" : "ltr"}
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <NextIntlClientProvider>
-          <QueryProvider>
-            <AuthInitializer />
-            {children}
-            <Toaster position="bottom-right" richColors closeButton />
-          </QueryProvider>
-        </NextIntlClientProvider>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+          <NextIntlClientProvider>
+            <QueryProvider>
+              <AuthInitializer />
+              {children}
+              <Toaster position="bottom-right" richColors closeButton />
+            </QueryProvider>
+          </NextIntlClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

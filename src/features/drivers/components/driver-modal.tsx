@@ -14,7 +14,7 @@ const initialValues: AddDriverPayload = {
   name: "", phone: "", nationalId: "", hub: "Cairo Hub 4",
   vehicle: "Mercedes-Benz", plateNumber: "", vehicleColor: "Arctic White",
 };
-const inputClass = "h-[30px] w-full min-w-0 rounded-xl border border-transparent bg-[#f1f5f9] px-3 text-[10px] text-text-primary outline-none placeholder:text-[#94a8c3] focus:border-primary focus:ring-2 focus:ring-primary/10";
+const inputClass = "h-[30px] w-full min-w-0 rounded-xl border border-transparent bg-secondary px-3 text-[10px] text-text-primary outline-none placeholder:text-text-placeholder focus:border-primary focus:ring-2 focus:ring-primary/10";
 
 export default function DriverModal({ driver, onClose, onSuccess }: DriverModalProps) {
   const t = useTranslations("driverForm");
@@ -89,8 +89,8 @@ export default function DriverModal({ driver, onClose, onSuccess }: DriverModalP
   }
 
   function photo(fieldName: "driverPhoto" | "vehiclePhoto", label: string) {
-    return field(fieldName, label, <div className="flex min-h-[66px] flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-[#e1e8f0] bg-[#f8fafc] px-3 py-2">
-      <label className="cursor-pointer rounded-lg border border-[#e1e8f0] bg-white px-3 py-1 text-[10px] text-black focus-within:ring-2 focus-within:ring-primary" htmlFor={fieldName}>
+    return field(fieldName, label, <div className="flex min-h-[66px] flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-secondary px-3 py-2">
+      <label className="cursor-pointer rounded-lg border border-border bg-card px-3 py-1 text-[10px] text-text-primary focus-within:ring-2 focus-within:ring-primary" htmlFor={fieldName}>
         {t("upload")}
         <input id={fieldName} aria-label={label} aria-invalid={Boolean(errors[fieldName])} aria-describedby={fieldName + "-help" + (errors[fieldName] ? " " + fieldName + "-error" : "")} type="file" accept="image/png,image/jpeg" className="sr-only" onChange={(event) => updateValue(fieldName, event.target.files?.[0])} />
       </label>
@@ -99,7 +99,7 @@ export default function DriverModal({ driver, onClose, onSuccess }: DriverModalP
   }
 
   return (
-    <dialog ref={dialogRef} aria-labelledby="add-driver-title" aria-describedby="add-driver-description" onCancel={(event) => { event.preventDefault(); if (!mutation.isPending) onClose(); }} className="fixed inset-0 m-auto max-h-[calc(100dvh-16px)] w-[calc(100%-16px)] max-w-[454px] overflow-y-auto rounded-[14px] border border-[#dce3ec] bg-white p-[22px] text-text-primary shadow-xl backdrop:bg-black/40">
+    <dialog ref={dialogRef} aria-labelledby="add-driver-title" aria-describedby="add-driver-description" onCancel={(event) => { event.preventDefault(); if (!mutation.isPending) onClose(); }} className="fixed inset-0 m-auto max-h-[calc(100dvh-16px)] w-[calc(100%-16px)] max-w-[454px] overflow-y-auto rounded-[14px] border border-border bg-card p-[22px] text-text-primary shadow-xl backdrop:bg-black/40">
       <div className="flex items-start justify-between gap-3 border-b border-[#f1f5f9] pb-3">
         <div>
           <h2 id="add-driver-title" className="text-[16px] font-semibold tracking-tight">{driver ? t("editTitle") : t("addTitle")}</h2>

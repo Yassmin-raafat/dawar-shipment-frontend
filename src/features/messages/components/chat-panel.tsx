@@ -22,7 +22,7 @@ export default function ChatPanel({ conversation, onBack }: { conversation: Conv
     const history = historyRef.current;
     if (history) history.scrollTop = history.scrollHeight;
   }, [conversation.id, lastMessageId]);
-  return <section aria-label={t("conversationWith", { name: conversation.name })} className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl bg-[#fbfcfd]">
+  return <section aria-label={t("conversationWith", { name: conversation.name })} className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl bg-background">
     <header className="flex shrink-0 items-center gap-3 border-b border-border/30 bg-card px-4 py-3">
       <button type="button" onClick={onBack} aria-label={t("back")} className="grid size-7 shrink-0 place-items-center rounded-lg text-text-secondary hover:bg-secondary md:hidden"><svg aria-hidden="true" className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="m14 5-7 7 7 7"/></svg></button>
       <ConversationAvatar conversation={conversation} />

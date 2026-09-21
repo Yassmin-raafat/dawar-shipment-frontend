@@ -6,7 +6,8 @@ import Image from "next/image";
 import AssignShipmentModal from "@/features/shipments/components/assign-shipment-modal";
 import DriverModal from "@/features/drivers/components/driver-modal";
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import useClickOutside from "@/hooks/use-click-outside";
 import { useDriver } from "@/features/drivers/hooks/use-driver";
 import { DriverNotFoundError } from "@/services/drivers-api";
 import { ActiveShipmentCard, AssignedVehicleCard, RecentDeliveries, ShiftActivity } from "@/features/drivers/components/driver-detail-cards";
@@ -17,6 +18,10 @@ export default function DriverDetailsPage({ id, initialAssignShipmentOpen = fals
   const [isAssignShipmentOpen, setIsAssignShipmentOpen] = useState(initialAssignShipmentOpen);
   const [successMessage, setSuccessMessage] = useState<{ kind: "updated"; name: string } | { kind: "assigned"; name: string; id: string } | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(initialEditOpen);
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+  const optionsRef = useRef<HTMLDivElement>(null);
+  const closeOptions = useCallback(() => setIsOptionsOpen(false), []);
+  useClickOutside(optionsRef, closeOptions);
 
   if (isLoading) return <div role="status" aria-label={t("loading")} className="mx-3 space-y-4">
     <div aria-hidden="true" className="h-24 animate-pulse rounded-2xl bg-secondary" />
@@ -41,7 +46,7 @@ export default function DriverDetailsPage({ id, initialAssignShipmentOpen = fals
       </div>
       <div className="flex items-center gap-2">
         <button type="button" onClick={() => { setSuccessMessage(null); setIsAssignShipmentOpen(true); }} className="inline-flex h-8 items-center gap-2 rounded-xl bg-primary px-3 text-[10px] font-medium text-primary-foreground hover:bg-primary-hover"><svg aria-hidden="true" className="size-3" viewBox="0 0 20 20" fill="none" stroke="currentColor"><path d="M10 3v14M3 10h14"/></svg>{t("assign")}</button>
-        <details className="relative"><summary aria-label={t("options")} className="grid size-8 cursor-pointer list-none place-items-center rounded-xl border border-border/60 text-xs text-text-muted [&::-webkit-details-marker]:hidden">···</summary><div className="absolute end-0 top-10 z-10 w-36 rounded-xl border border-border bg-card p-3 text-xs shadow-lg"><Link href="/drivers" className="text-primary">{t("back")}</Link></div></details>
+        <div ref={optionsRef} className="relative"><button type="button" aria-expanded={isOptionsOpen} aria-label={t("options")} onClick={() => setIsOptionsOpen((open) => !open)} className="grid size-8 cursor-pointer place-items-center rounded-xl border border-border/60 text-xs text-text-muted">···</button>{isOptionsOpen && <div className="absolute end-0 top-10 z-10 w-36 rounded-xl border border-border bg-card p-3 text-xs shadow-lg"><button type="button" onClick={() => { setIsOptionsOpen(false); setSuccessMessage(null); setIsEditOpen(true); }} className="text-primary">{t("edit")}</button></div>}</div>
       </div>
     </section>
     {successMessage && <p role="status" className="rounded-xl bg-emerald-50 px-5 py-3 text-xs text-emerald-700">{t(successMessage.kind, successMessage)}</p>}

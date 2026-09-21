@@ -31,7 +31,7 @@ export default function MessageInput({ recipient, conversationId }: { recipient:
   }
 
   return <form onSubmit={submit} aria-busy={mutation.isPending} className="shrink-0 border-t border-border/30 bg-card px-3 py-3">
-    <div className="flex items-center gap-2 rounded-2xl border border-[#edf1f6] bg-[#f5f7fb] p-1.5">
+    <div className="flex items-center gap-2 rounded-2xl border border-border bg-secondary p-1.5">
       <button type="button" aria-label={t("attach")} aria-disabled="true" title={t("attachmentsSoon")} className="grid size-8 shrink-0 place-items-center rounded-lg text-[#91a3bd]">
         <svg aria-hidden="true" className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="m8 12 7-7a3 3 0 0 1 4 4L9 19a4.5 4.5 0 0 1-6-6L14 2m-4 10 5-5a1 1 0 0 1 2 2l-7 7a2 2 0 0 1-3-3l7-7"/></svg>
       </button>

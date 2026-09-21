@@ -8,17 +8,19 @@ import { useCreateConversation } from "../hooks/use-create-conversation";
 import type { Conversation } from "../types/message";
 import ConversationAvatar from "./conversation-avatar";
 import { useTranslations } from "next-intl";
+import useDebounce from "@/hooks/use-debounce";
 export default function NewChatModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (conversation: Conversation) => void }) {
   const t = useTranslations("messages");
   const translateError = useMessageError();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const submitting = useRef(false);
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search);
   const [filter, setFilter] = useState("all");
   const [selectedUserId, setSelectedUserId] = useState("");
   const { data: users = [], isLoading, error, refetch } = useChatUsers();
   const mutation = useCreateConversation();
-  const term = search.trim().toLowerCase();
+  const term = debouncedSearch.trim().toLowerCase();
   const visibleUsers = users.filter((user) =>
     (filter === "all" || user.online === (filter === "online")) &&
     [user.name, user.subtitle, user.shipmentId ?? ""].some((value) => value.toLowerCase().includes(term)));
@@ -55,10 +57,10 @@ export default function NewChatModal({ onClose, onSuccess }: { onClose: () => vo
       <p className="mt-1 text-xs text-text-secondary">{t("selectUser")}</p>
       <fieldset disabled={mutation.isPending} className="mt-4 space-y-3 disabled:opacity-60">
         <label className="block text-xs">{t("searchUsers")}
-          <input autoFocus type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder={t("userSearchPlaceholder")} className="mt-1 h-9 w-full rounded-xl border border-border/30 bg-[#f5f7fa] px-3 text-xs outline-none focus:border-primary" />
+          <input autoFocus type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder={t("userSearchPlaceholder")} className="mt-1 h-9 w-full rounded-xl border border-border/30 bg-secondary px-3 text-xs outline-none focus:border-primary" />
         </label>
         <label className="block text-xs">{t("availability")}
-          <select value={filter} onChange={(event) => setFilter(event.target.value)} className="mt-1 h-9 w-full rounded-xl border border-border/30 bg-[#f5f7fa] px-3 text-xs">
+          <select value={filter} onChange={(event) => setFilter(event.target.value)} className="mt-1 h-9 w-full rounded-xl border border-border/30 bg-secondary px-3 text-xs">
             <option value="all">{t("allUsers")}</option><option value="online">{t("online")}</option><option value="offline">{t("offline")}</option>
           </select>
         </label>

@@ -18,7 +18,7 @@ export function ActiveShipmentCard({ shipment }: { shipment?: DriverShipment }) 
         <div><dt className="text-[10px] text-[#8b9fba]">{t("fee")}</dt><dd className="mt-1 text-xs font-semibold text-primary">{t("amount", { amount: shipment.fee })}</dd></div>
       </dl>
       <div className="mt-4 flex justify-between gap-4 text-[10px] text-[#7387a5]"><span>{shipment.origin}</span><span className="text-end">{shipment.destination}</span></div>
-      <div role="progressbar" aria-label={t("routeProgress")} aria-valuemin={0} aria-valuemax={100} aria-valuenow={shipment.progress} className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#f1f5f9]"><div className="h-full rounded-full bg-primary" style={{ width: Math.max(0, Math.min(100, shipment.progress)) + "%" }} /></div>
+      <div role="progressbar" aria-label={t("routeProgress")} aria-valuemin={0} aria-valuemax={100} aria-valuenow={shipment.progress} className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary"><div className="h-full rounded-full bg-primary" style={{ width: Math.max(0, Math.min(100, shipment.progress)) + "%" }} /></div>
     </> : <p className="py-8 text-xs text-text-secondary">{t("noActiveShipment")}</p>}
   </section>;
 }

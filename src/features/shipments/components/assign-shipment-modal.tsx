@@ -7,6 +7,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useAvailableShipments } from "@/features/shipments/hooks/use-available-shipments";
 import { useAssignShipment } from "@/features/shipments/hooks/use-assign-shipment";
 import type { Shipment } from "@/features/shipments/types/shipment";
+import useDebounce from "@/hooks/use-debounce";
 
 export default function AssignShipmentModal({ driverId, driverName, onClose, onSuccess }: {
   driverId: string; driverName: string; onClose: () => void; onSuccess: (shipment: Shipment) => void;
@@ -16,6 +17,7 @@ export default function AssignShipmentModal({ driverId, driverName, onClose, onS
   const dialogRef = useRef<HTMLDialogElement>(null);
   const submitting = useRef(false);
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search);
   const [hub, setHub] = useState("Cairo Hub 4");
   const [status, setStatus] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -23,7 +25,7 @@ export default function AssignShipmentModal({ driverId, driverName, onClose, onS
   const query = useAvailableShipments();
   const mutation = useAssignShipment();
   const shipments = query.data ?? [];
-  const term = search.trim().toLowerCase().replace(/^#/, "");
+  const term = debouncedSearch.trim().toLowerCase().replace(/^#/, "");
   const hubs = Array.from(new Set([hub, ...shipments.map((shipment) => shipment.origin)])).filter(Boolean);
   const visible = shipments.filter((shipment) => (!hub || shipment.origin === hub)
     && (!status || shipment.status === status)

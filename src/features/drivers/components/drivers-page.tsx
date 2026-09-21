@@ -7,6 +7,7 @@ import DriversToolbar from "@/features/drivers/components/drivers-toolbar";
 import { useDrivers } from "@/features/drivers/hooks/use-drivers";
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import useDebounce from "@/hooks/use-debounce";
 
 const PAGE_SIZE = 10;
 
@@ -14,12 +15,13 @@ export default function DriversPage() {
   const t = useTranslations("drivers");
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery);
   const [isAddDriverOpen, setIsAddDriverOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const { data: drivers = [], isError, isLoading } = useDrivers();
 
   const filteredDrivers = useMemo(() => {
-    const normalizedQuery = searchQuery.trim().toLowerCase();
+    const normalizedQuery = debouncedSearchQuery.trim().toLowerCase();
 
     if (!normalizedQuery) {
       return drivers;
@@ -33,7 +35,7 @@ export default function DriversPage() {
         driver.id,
       ].some((value) => value.toLowerCase().includes(normalizedQuery));
     });
-  }, [drivers, searchQuery]);
+  }, [drivers, debouncedSearchQuery]);
 
   const pageCount = Math.max(1, Math.ceil(filteredDrivers.length / PAGE_SIZE));
   const currentPage = Math.min(page, pageCount);
