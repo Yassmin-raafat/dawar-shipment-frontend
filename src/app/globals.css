@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "maplibre-gl/dist/maplibre-gl.css";
 
 /* Class-based dark mode: add .dark to the html element. */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -126,3 +127,16 @@ html[lang="ar"] body {
   font-family: var(--font-arabic, var(--font-sans)), system-ui, sans-serif;
 }
 
+.order-map-marker {
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  border: 4px solid color-mix(in srgb, var(--marker-color) 30%, transparent);
+  border-radius: 9999px;
+  background: var(--marker-color);
+  box-shadow: 0 4px 10px rgb(15 23 42 / 22%);
+  color: var(--marker-foreground);
+  font-size: 0.75rem;
+  font-weight: 700;
+}

@@ -230,7 +230,7 @@
     "Silver": "Silver"
   },
   "orders": {
-    "title": "Orders", "subtitle": "Track and manage your deliveries", "search": "Search orders", "searchPlaceholder": "Search by ID, driver, origin, or destination", "filter": "Filter orders", "mapLabel": "Order route map", "orderDetails": "Order Details", "recipient": "Recipient", "driver": "Driver", "pickup": "Pickup", "delivery": "Delivery destination", "baseFee": "Base shipping fee", "tax": "Tax", "totalFee": "Total delivery fee", "driverDetails": "Driver Details", "loadError": "Could not load orders", "retry": "Retry", "empty": "No orders available", "noResults": "No orders match your search.",
+    "title": "Orders", "subtitle": "Track and manage your deliveries", "search": "Search orders", "searchPlaceholder": "Search by ID, driver, origin, or destination", "filter": "Filter orders", "mapLabel": "Order route map", "mapLoading": "Loading order map...", "mapUnavailable": "The order map is unavailable right now.", "mapError": "The order map could not be loaded. Please refresh and try again.", "orderDetails": "Order Details", "recipient": "Recipient", "driver": "Driver", "pickup": "Pickup", "delivery": "Delivery destination", "baseFee": "Base shipping fee", "tax": "Tax", "totalFee": "Total delivery fee", "driverDetails": "Driver Details", "loadError": "Could not load orders", "retry": "Retry", "empty": "No orders available", "noResults": "No orders match your search.",
     "summary": { "total": "Total Orders", "delivered": "Delivered Orders", "pending": "Pending Orders", "inTransit": "In-Transit Orders" },
     "status": { "Delivered": "Delivered", "Pending": "Pending", "In Transit": "In Transit" }
   }

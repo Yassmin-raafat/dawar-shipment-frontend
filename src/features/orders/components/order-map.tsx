@@ -1,5 +1,26 @@
+"use client";
+
+import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 import type { Order } from "@/features/orders/types/order";
 
+function OrderMapLoading() {
+  const t = useTranslations("orders");
+
+  return <div aria-busy="true" role="status" className="grid h-full min-h-[650px] place-items-center bg-secondary text-xs text-text-secondary">{t("mapLoading")}</div>;
+}
+
+const MapLibreOrderMap = dynamic(() => import("./order-maplibre-map"), {
+  ssr: false,
+  loading: OrderMapLoading,
+});
+
 export default function OrderMap({ order, label }: { order: Order; label: string }) {
-  return <section aria-label={label} className="relative h-full min-h-[650px] overflow-hidden rounded-2xl border border-border/40 bg-secondary"><div className="absolute inset-0 opacity-50" style={{ backgroundImage: "linear-gradient(35deg, transparent 48%, var(--border) 49%, transparent 51%), linear-gradient(120deg, transparent 48%, var(--border) 49%, transparent 51%), linear-gradient(90deg, transparent 95%, var(--border) 96%), linear-gradient(0deg, transparent 95%, var(--border) 96%)", backgroundSize: "72px 72px, 96px 96px, 180px 180px, 180px 180px" }} /><div className="absolute -start-10 top-[18%] h-20 w-[120%] rotate-[13deg] border-y-8 border-card/70 bg-primary/5" /><div className="absolute start-[18%] top-[30%] h-1 w-[58%] rotate-[24deg] rounded-full bg-primary/80 shadow-[0_0_0_5px_color-mix(in_srgb,var(--primary)_18%,transparent)]" /><div className="absolute start-[22%] top-[28%] grid size-5 place-items-center rounded-full border-4 border-primary/30 bg-primary text-[8px] text-primary-foreground">•</div><div className="absolute end-[24%] bottom-[25%] grid size-5 place-items-center rounded-full border-4 border-success/30 bg-success text-[8px] text-success-foreground">•</div><div className="absolute bottom-4 start-4 rounded-lg border border-border/40 bg-card/90 px-3 py-2 text-[10px] shadow">{order.origin} → {order.destination}</div></section>;
+  const t = useTranslations("orders");
+
+  if (!order.coordinates?.origin || !order.coordinates?.destination) {
+    return <section aria-label={label} className="grid h-full min-h-[650px] place-items-center rounded-2xl border border-border/40 bg-secondary px-6 text-center text-xs text-text-secondary">{t("mapUnavailable")}</section>;
+  }
+
+  return <section aria-label={label} className="h-full min-h-[650px] overflow-hidden rounded-2xl border border-border/40 bg-secondary"><MapLibreOrderMap order={order} pickupLabel={t("pickup")} destinationLabel={t("delivery")} errorLabel={t("mapError")} /></section>;
 }
