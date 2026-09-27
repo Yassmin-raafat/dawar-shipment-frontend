@@ -64,6 +64,7 @@ export async function sendMessage(conversationId: string, text: string): Promise
     direction: "outgoing",
     text: trimmedText,
     timestamp: new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
+    status: "delivered",
   };
   conversation.messages.push(message);
   conversation.preview = message.text;

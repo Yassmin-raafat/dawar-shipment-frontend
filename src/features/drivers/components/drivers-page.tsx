@@ -18,7 +18,7 @@ export default function DriversPage() {
   const debouncedSearchQuery = useDebounce(searchQuery);
   const [isAddDriverOpen, setIsAddDriverOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-  const { data: drivers = [], isError, isLoading } = useDrivers();
+  const { data: drivers = [], isError, isLoading, refetch } = useDrivers();
 
   const filteredDrivers = useMemo(() => {
     const normalizedQuery = debouncedSearchQuery.trim().toLowerCase();
@@ -64,11 +64,12 @@ export default function DriversPage() {
 
         {isError ? (
           <div role="alert" className="rounded-[8px] border border-destructive/30 bg-destructive/5 px-5 py-10 text-center text-[14px] font-medium text-destructive">
-            {t("loadError")}
+            <p>{t("loadError")}</p>
+            <button type="button" onClick={() => void refetch()} className="mt-3 text-xs font-semibold text-primary underline underline-offset-4">{t("retry")}</button>
           </div>
         ) : null}
 
-        {!isLoading && !isError ? <DriversTable drivers={paginatedDrivers} /> : null}
+        {!isLoading && !isError ? <DriversTable drivers={paginatedDrivers} emptyMessage={searchQuery ? t("empty") : t("noDrivers")} /> : null}
         </div>
         {!isLoading && !isError ? (
             <div className="flex shrink-0 flex-col gap-3 pt-6 text-[11px] text-text-secondary sm:flex-row sm:items-center sm:justify-between">

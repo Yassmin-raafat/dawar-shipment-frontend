@@ -4,6 +4,7 @@ export type Message = {
   text: string;
   timestamp: string;
   direction: "incoming" | "outgoing";
+  status?: "sending" | "sent" | "delivered" | "read";
 };
 
 export type Conversation = {
@@ -17,5 +18,6 @@ export type Conversation = {
   unreadCount: number;
   subtitle: string;
   shipmentId?: string;
+  driverId?: string;
   dateLabel: string;
 };

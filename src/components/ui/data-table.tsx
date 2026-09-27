@@ -22,7 +22,7 @@ export default function DataTable<TData>({
 }: DataTableProps<TData>) {
   return (
     <div className="bg-card">
-        <table className="min-w-full border-collapse">
+        <table className="w-full min-w-[760px] border-collapse">
           <thead className="sticky top-0 z-10 bg-background">
             <tr>
               {columns.map((column) => (

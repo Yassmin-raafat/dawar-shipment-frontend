@@ -37,7 +37,7 @@
     "conversationWith": "محادثة مع {name}",
     "back": "العودة إلى المحادثات",
     "options": "خيارات المحادثة (قريبًا)",
-    "optionsSoon": "خيارات المحادثة متاحة قريبًا",
+    "optionsSoon": "خيارات المحادثة متاحة قريبًا", "viewDriverProfile": "عرض ملف السائق", "viewActiveShipment": "عرض الشحنة النشطة", "muteConversation": "كتم المحادثة", "unmuteConversation": "إلغاء كتم المحادثة", "muted": "مكتومة", "markUnread": "وضع علامة كغير مقروءة", "delivered": "تم التسليم",
     "history": "سجل الرسائل",
     "loadingMessages": "جارٍ تحميل الرسائل",
     "retryMessages": "إعادة تحميل الرسائل",
@@ -176,7 +176,7 @@
     "Assigned": "مسندة"
   },
   "drivers": {
-    "searchLabel": "البحث عن السائقين", "searchPlaceholder": "ابحث باسم السائق أو الرقم أو الهاتف...", "add": "إضافة سائق جديد", "table": "جدول السائقين", "loadError": "تعذّر تحميل السائقين. حاول مرة أخرى لاحقًا.", "empty": "لا يوجد سائقون يطابقون بحثك.", "showing": "عرض {from}–{to} من أصل {total} سائقين", "filteredFrom": " (تمت التصفية من أصل {total})", "previous": "السابق", "next": "التالي", "selectDrivers": "اختيار السائقين", "selectAll": "اختيار جميع السائقين في هذه الصفحة", "select": "اختيار {name}", "profile": "ملف السائق", "contact": "بيانات الاتصال", "vehicle": "المركبة المخصصة", "rating": "التقييم والاعتمادية", "actions": "الإجراءات", "onTime": "{percent}% في الموعد", "driverActions": "إجراءات {name}", "viewEdit": "عرض/تعديل", "assign": "إسناد شحنة"
+    "searchLabel": "البحث عن السائقين", "searchPlaceholder": "ابحث باسم السائق أو الرقم أو الهاتف...", "add": "إضافة سائق جديد", "table": "جدول السائقين", "loadError": "تعذّر تحميل السائقين. حاول مرة أخرى لاحقًا.", "retry": "إعادة المحاولة", "noDrivers": "لا يوجد سائقون متاحون بعد.", "empty": "لا يوجد سائقون يطابقون بحثك.", "showing": "عرض {from}–{to} من أصل {total} سائقين", "filteredFrom": " (تمت التصفية من أصل {total})", "previous": "السابق", "next": "التالي", "selectDrivers": "اختيار السائقين", "selectAll": "اختيار جميع السائقين في هذه الصفحة", "select": "اختيار {name}", "profile": "ملف السائق", "contact": "بيانات الاتصال", "vehicle": "المركبة المخصصة", "rating": "التقييم والاعتمادية", "actions": "الإجراءات", "onTime": "{percent}% في الموعد", "driverActions": "إجراءات {name}", "viewEdit": "عرض/تعديل", "assign": "إسناد شحنة"
   },
   "driverForm": {
     "editTitle": "عرض/تعديل السائق",
@@ -233,5 +233,6 @@
     "title": "الطلبات", "subtitle": "تتبع شحناتك وأدر عمليات التسليم", "search": "البحث في الطلبات", "searchPlaceholder": "ابحث بالرقم أو السائق أو نقطة الانطلاق أو الوجهة", "filter": "تصفية الطلبات", "mapLabel": "خريطة مسار الطلب", "mapLoading": "جارٍ تحميل خريطة الطلب...", "mapUnavailable": "خريطة الطلب غير متاحة حاليًا.", "mapError": "تعذر تحميل خريطة الطلب. حدّث الصفحة وحاول مرة أخرى.", "orderDetails": "تفاصيل الطلب", "recipient": "المستلم", "driver": "السائق", "pickup": "الاستلام", "delivery": "وجهة التسليم", "baseFee": "رسوم الشحن الأساسية", "tax": "الضريبة", "totalFee": "إجمالي رسوم التسليم", "driverDetails": "تفاصيل السائق", "loadError": "تعذر تحميل الطلبات", "retry": "إعادة المحاولة", "empty": "لا توجد طلبات", "noResults": "لا توجد طلبات تطابق بحثك.",
     "summary": { "total": "إجمالي الطلبات", "delivered": "الطلبات المسلّمة", "pending": "الطلبات المعلّقة", "inTransit": "الطلبات قيد التوصيل" },
     "status": { "Delivered": "تم التسليم", "Pending": "معلّق", "In Transit": "قيد التوصيل" }
-  }
+  },
+  "userDetails": { "title": "تفاصيل المستخدم", "breadcrumb": "المستخدمون", "view": "عرض", "back": "العودة إلى المستخدمين", "loading": "جارٍ تحميل تفاصيل المستخدم", "notFound": "المستخدم غير موجود", "loadError": "تعذر تحميل تفاصيل المستخدم", "notFoundDescription": "هذا المستخدم غير موجود أو لم يعد متاحًا.", "retryDescription": "يرجى المحاولة مرة أخرى.", "retry": "إعادة المحاولة", "options": "خيارات المستخدم", "contact": "التواصل مع المستخدم", "activeShipment": "الشحنة الحالية النشطة", "shipmentId": "معرّف الشحنة:", "assignedDriver": "السائق المعيّن", "from": "من", "to": "إلى", "fee": "الرسوم", "originLabel": "الشيخ زايد", "destinationLabel": "مركز التجمع الخامس", "recentShipments": "الشحنات الأخيرة", "viewAll": "عرض الكل", "orderId": "معرّف الطلب", "dateTime": "التاريخ والوقت", "action": "إجراء", "view": "عرض", "summary": { "totalOrders": "إجمالي الطلبات", "fulfillment": "نسبة الإنجاز", "spend": "الإنفاق اللوجستي", "topClient": "عميل مميز", "active": "نشط قيد التنفيذ", "shipment": "شحنة", "inQueue": "في قائمة التوصيل" }, "status": { "label": "الحالة", "inProgress": "قيد التنفيذ", "delivered": "تم التسليم" } }
 }

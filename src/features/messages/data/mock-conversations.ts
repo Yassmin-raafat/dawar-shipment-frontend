@@ -4,7 +4,7 @@ export const mockConversations: (Conversation & { messages: Message[] })[] = [
   {
     id: "mahmoud", name: "Mahmoud Hassan", initials: "MH", avatarColor: "bg-[#e6ede5] text-[#46604a]",
     preview: "Arrived at Cairo Hub 4, unloading order #EG-49120-CAI now.", timestamp: "Just now", online: true, unreadCount: 0,
-    subtitle: "Mercedes Sprinter 2500 (#08)", shipmentId: "EG-49120-CAI", dateLabel: "Today, November 14",
+    subtitle: "Mercedes Sprinter 2500 (#08)", shipmentId: "EG-49120-CAI", driverId: "DRV-001", dateLabel: "Today, November 14",
     messages: [
       { id: "mahmoud-1", sender: "Mahmoud Hassan", direction: "incoming", text: "Good morning Nour, I have started my morning shift. Sprinter #08 inspection completed with full tank.", timestamp: "08:32 AM" },
       { id: "mahmoud-2", sender: "Nour", direction: "outgoing", text: "Morning Mahmoud! You have 3 shipments assigned for Nasr City and 5th Settlement. Highest priority is order #EG-49120 for recipient Zeyad Waleed.", timestamp: "08:35 AM" },

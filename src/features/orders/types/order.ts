@@ -9,6 +9,7 @@ export type Order = {
   pickupDate: string;
   deliveryDate: string;
   recipient: { name: string; phone: string };
+  customerId: string;
   driver: { id: string; name: string; role: string; initials: string; vehicle: string; vehicleImage?: string };
   fees: { base: number; tax: number; total: number };
   progress: number;

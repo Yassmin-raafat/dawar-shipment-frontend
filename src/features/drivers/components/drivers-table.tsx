@@ -8,9 +8,10 @@ import type { Driver } from "@/features/drivers/types/driver";
 
 type DriversTableProps = {
   drivers: Driver[];
+  emptyMessage: string;
 };
 
-export default function DriversTable({ drivers }: DriversTableProps) {
+export default function DriversTable({ drivers, emptyMessage }: DriversTableProps) {
   const t = useTranslations("drivers");
   const driverColumns = useDriverColumns();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -24,7 +25,7 @@ export default function DriversTable({ drivers }: DriversTableProps) {
     <DataTable
       columns={columns}
       data={drivers}
-      emptyMessage={t("empty")}
+      emptyMessage={emptyMessage}
       getRowKey={(driver) => driver.id}
     />
   );

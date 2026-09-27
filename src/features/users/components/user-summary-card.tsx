@@ -1,0 +1,2 @@
+import type { ReactNode } from "react";
+export default function UserSummaryCard({ label, value, hint, icon }: { label: string; value: string; hint: string; icon: ReactNode }) { return <div className="rounded-xl bg-secondary/60 p-3 sm:p-4"><div className="flex items-start justify-between text-[9px] text-text-secondary"><span>{label}</span><span className="grid size-7 place-items-center rounded-lg bg-primary-muted text-primary">{icon}</span></div><p className="mt-2 text-lg font-semibold tracking-tight">{value}</p><p className="mt-1 text-[9px] text-primary">{hint}</p></div> }

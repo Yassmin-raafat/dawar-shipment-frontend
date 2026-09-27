@@ -6,6 +6,10 @@ import MessageInput from "./message-input";
 import type { Conversation } from "@/features/messages/types/message";
 import { useMessages } from "@/features/messages/hooks/use-messages";
 import { useEffect, useRef } from "react";
+import { useCallback, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { conversationsQueryKey } from "@/features/messages/hooks/use-conversations";
+import useClickOutside from "@/hooks/use-click-outside";
 
 export default function ChatPanel({ conversation, onBack }: { conversation: Conversation; onBack: () => void }) {
   const t = useTranslations("messages");
@@ -17,6 +21,12 @@ export default function ChatPanel({ conversation, onBack }: { conversation: Conv
     refetch: refetchMessages,
   } = useMessages(conversation.id);
   const historyRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const queryClient = useQueryClient();
+  const closeMenu = useCallback(() => setIsMenuOpen(false), []);
+  useClickOutside(menuRef, closeMenu);
   const lastMessageId = messages.at(-1)?.id;
   useEffect(() => {
     const history = historyRef.current;
@@ -26,8 +36,8 @@ export default function ChatPanel({ conversation, onBack }: { conversation: Conv
     <header className="flex shrink-0 items-center gap-3 border-b border-border/30 bg-card px-4 py-3">
       <button type="button" onClick={onBack} aria-label={t("back")} className="grid size-7 shrink-0 place-items-center rounded-lg text-text-secondary hover:bg-secondary md:hidden"><svg aria-hidden="true" className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="m14 5-7 7 7 7"/></svg></button>
       <ConversationAvatar conversation={conversation} />
-      <div className="min-w-0 flex-1"><h2 className="truncate text-xs font-semibold">{conversation.name}</h2><p className="mt-0.5 truncate text-[10px] text-[#7387a5]">{conversation.subtitle}</p><span className="sr-only">{conversation.online ? t("online") : t("offline")}</span></div>
-      <button type="button" aria-label={t("options")} aria-disabled="true" title={t("optionsSoon")} className="grid size-7 shrink-0 place-items-center rounded-lg text-[#91a3bd]">···</button>
+      <div className="min-w-0 flex-1"><h2 className="truncate text-xs font-semibold">{conversation.name}</h2><p className="mt-0.5 truncate text-[10px] text-[#7387a5]">{conversation.subtitle}{isMuted && <span className="ms-2 text-text-muted">· {t("muted")}</span>}</p><span className="sr-only">{conversation.online ? t("online") : t("offline")}</span></div>
+      <div ref={menuRef} className="relative"><button type="button" aria-label={t("options")} aria-expanded={isMenuOpen} onClick={() => setIsMenuOpen((prev) => !prev)} className="grid size-7 shrink-0 place-items-center rounded-lg text-[#91a3bd] hover:bg-secondary focus-visible:outline-2 focus-visible:outline-primary">···</button>{isMenuOpen && <div role="menu" className="absolute end-0 top-9 z-20 w-48 rounded-xl border border-border bg-card p-2 text-xs shadow-lg"><button type="button" role="menuitem" aria-pressed={isMuted} onClick={() => { setIsMuted((prev) => !prev); closeMenu(); }} className="block w-full rounded-lg px-3 py-2 text-start text-text-primary hover:bg-secondary">{isMuted ? t("unmuteConversation") : t("muteConversation")}</button><button type="button" role="menuitem" onClick={() => { queryClient.setQueryData<Conversation[]>(conversationsQueryKey, (current) => current?.map((item) => item.id === conversation.id ? { ...item, unreadCount: Math.max(1, item.unreadCount) } : item)); closeMenu(); }} className="block w-full rounded-lg px-3 py-2 text-start text-text-primary hover:bg-secondary">{t("markUnread")}</button></div>}</div>
     </header>
     <div ref={historyRef} key={`history-${conversation.id}`} role="region" aria-label={t("history")} tabIndex={0} className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-6 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/20 sm:px-5">
       <p className="py-8 text-center text-[9px] text-[#91a3bd]">{conversation.dateLabel === "Today" ? t("today") : conversation.dateLabel.startsWith("Today, ") ? t("todayWithDate", { date: conversation.dateLabel.slice(7) }) : conversation.dateLabel.startsWith("Yesterday, ") ? t("yesterdayWithDate", { date: conversation.dateLabel.slice(11) }) : conversation.dateLabel}</p>
