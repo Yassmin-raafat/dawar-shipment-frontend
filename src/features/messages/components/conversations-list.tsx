@@ -3,8 +3,8 @@ import { useTranslations } from "next-intl";
 import ConversationItem from "./conversation-item";
 import type { Conversation } from "@/features/messages/types/message";
 
-export default function ConversationsList({ conversations, selectedId, search, onSearch, onSelect, isLoading, error, onRetry, onNewChat, hasConversations }: {
-  conversations: Conversation[]; selectedId: string; search: string; onSearch: (value: string) => void; onSelect: (id: string) => void;
+export default function ConversationsList({ conversations, unreadCount, selectedId, search, onSearch, onSelect, isLoading, error, onRetry, onNewChat, hasConversations }: {
+  conversations: Conversation[]; unreadCount: number; selectedId: string; search: string; onSearch: (value: string) => void; onSelect: (id: string) => void;
   isLoading: boolean; error?: string; onRetry: () => void; onNewChat: () => void; hasConversations: boolean;
 }) {
   const t = useTranslations("messages");
@@ -12,7 +12,7 @@ export default function ConversationsList({ conversations, selectedId, search, o
   return <section aria-labelledby="messages-title" className="flex h-full min-h-0 flex-col rounded-2xl bg-card">
     <div className="shrink-0 border-b border-border/20 px-4 pb-4 pt-4">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2"><h1 id="messages-title" className="text-sm font-semibold tracking-tight">{t("title")}</h1><span className="rounded-full bg-primary-muted px-2 py-0.5 text-[9px] font-medium text-primary">{t("newCount", { count: 4 })}</span></div>
+        <div className="flex items-center gap-2"><h1 id="messages-title" className="text-sm font-semibold tracking-tight">{t("title")}</h1>{unreadCount > 0 && <span className="rounded-full bg-primary-muted px-2 py-0.5 text-[9px] font-medium text-primary">{t("newCount", { count: unreadCount })}</span>}</div>
         <button type="button" onClick={onNewChat} aria-label={t("newChat")} title={t("newChat")} className="grid size-7 place-items-center rounded-lg bg-secondary text-text-secondary">
           <svg aria-hidden="true" className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M15 4l5 5M10 14l-1 4 4-1L22 8a2 2 0 0 0-5-5l-7 11Z"/></svg>
         </button>

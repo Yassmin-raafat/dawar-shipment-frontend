@@ -1,5 +1,5 @@
 import type { AuthUser } from "@/features/auth/types/auth";
-import { getAccessToken, getAuthUser } from "@/features/auth/services/auth-storage";
+import { getCurrentUser } from "@/features/auth/services/auth-api";
 import { create } from "zustand";
 
 type AuthStore = {
@@ -7,7 +7,7 @@ type AuthStore = {
   isAuthenticated: boolean;
   isAuthChecked: boolean;
   setAuthenticated: (value: boolean, user?: AuthUser) => void;
-  checkAuth: () => void;
+  checkAuth: () => Promise<void>;
 };
 
 export const useAuthStore = create<AuthStore>((set) => ({
@@ -18,17 +18,16 @@ export const useAuthStore = create<AuthStore>((set) => ({
   setAuthenticated: (value, user) => {
     set({
       isAuthenticated: value,
-      user: value ? user ?? getAuthUser() : null,
+      user: value ? user ?? null : null,
       isAuthChecked: true,
     });
   },
 
-  checkAuth: () => {
-    const token = getAccessToken();
-
+  checkAuth: async () => {
+    const user = await getCurrentUser();
     set({
-      isAuthenticated: Boolean(token),
-      user: token ? getAuthUser() : null,
+      isAuthenticated: Boolean(user),
+      user,
       isAuthChecked: true,
     });
   },

@@ -7,8 +7,14 @@ export default function AuthInitializer() {
   const checkAuth = useAuthStore((state) => state.checkAuth);
 
   useEffect(() => {
-    checkAuth();
+    void checkAuth();
   }, [checkAuth]);
+
+  useEffect(() => {
+    const handleUnauthorized = () => useAuthStore.getState().setAuthenticated(false);
+    window.addEventListener("auth:unauthorized", handleUnauthorized);
+    return () => window.removeEventListener("auth:unauthorized", handleUnauthorized);
+  }, []);
 
   return null;
 }

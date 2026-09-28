@@ -1,31 +1,33 @@
-import { getMockProfileName } from "@/features/auth/services/auth-storage";
-import type { AuthUser, LoginPayload } from "@/features/auth/types/auth";
+import api from "@/lib/axios";
+import { getAccessToken, getAuthUser, removeAccessToken, saveAccessToken, saveAuthUser } from "@/features/auth/services/auth-storage";
+import type { AdminLoginRequest, AdminLoginResponse, AuthUser } from "@/features/auth/types/auth";
 
-function wait(milliseconds: number) {
-  return new Promise((resolve) => {
-    window.setTimeout(resolve, milliseconds);
-  });
-}
-
-export async function login(payload: LoginPayload) {
-  await wait(700);
-
-  if (payload.email.toLowerCase() === "fail@example.com") {
-    throw new Error("Invalid email or password.");
-  }
-
-  return {
-    message: "Logged in successfully.",
-    token: "mock-auth-token",
-    user: {
-      email: payload.email,
-      name: getMockProfileName(payload.email) ?? payload.email.split("@")[0].split(/[._-]/)[0].replace(/^./, (letter) => letter.toUpperCase()),
-    } satisfies AuthUser,
-  };
+export async function loginAdmin(email: string, password: string): Promise<AdminLoginResponse> {
+  const payload: AdminLoginRequest = { email, password };
+  const response = (await api.post<AdminLoginResponse>("/api/v1/admins/login", payload)).data;
+  saveAccessToken(response.data.accessToken);
+  saveAuthUser({ name: email.split("@")[0], email });
+  return response;
 }
 
 export async function logout() {
-  const { removeAccessToken } = await import("@/features/auth/services/auth-storage");
-
   removeAccessToken();
+}
+
+export async function getCurrentUser(): Promise<AuthUser | null> {
+  return getAccessToken() ? getAuthUser() : null;
+}
+
+export const getMe = getCurrentUser;
+
+export function getAuthErrorMessage(error: unknown) {
+  if (typeof error === "object" && error !== null && "response" in error) {
+    const response = error.response;
+    if (typeof response === "object" && response !== null && "data" in response) {
+      const data = response.data;
+      if (typeof data === "object" && data !== null && "message" in data && typeof data.message === "string") return data.message;
+    }
+  }
+  if (error instanceof Error && error.message) return error.message;
+  return "Unable to complete authentication. Please try again.";
 }

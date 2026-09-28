@@ -53,6 +53,11 @@ export async function getMessages(conversationId: string): Promise<Message[]> {
   return findConversation(conversationId).messages.map((message) => ({ ...message }));
 }
 
+export async function markConversationAsRead(conversationId: string): Promise<void> {
+  await wait();
+  findConversation(conversationId).unreadCount = 0;
+}
+
 export async function sendMessage(conversationId: string, text: string): Promise<Message> {
   const trimmedText = text.trim();
   if (!trimmedText) throw new Error("Enter a message before sending.");

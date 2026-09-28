@@ -5,8 +5,7 @@ import { loginSchema, type LoginValues } from "@/features/auth/schemas/login-sch
 import { getFieldErrors, type FieldErrors } from "@/features/auth/schemas/field-errors";
 import InputField from "@/components/ui/input-field";
 import { useAuthStore } from "@/features/auth/stores/auth-store";
-import { login } from "@/features/auth/services/auth-api";
-import { saveAccessToken, saveAuthUser } from "@/features/auth/services/auth-storage";
+import { getAuthErrorMessage, loginAdmin } from "@/features/auth/services/auth-api";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
@@ -72,17 +71,15 @@ export default function LoginForm() {
     setSubmitSuccess("");
 
     try {
-      const response = await login(result.data);
-
-      saveAccessToken(response.token);
-      saveAuthUser(response.user);
-      setAuthenticated(true, response.user);
+      await loginAdmin(result.data.email, result.data.password);
+      const user = { name: result.data.email.split("@")[0], email: result.data.email };
+      setAuthenticated(true, user);
 
       setSubmitSuccess(t("success"));
       router.push("/drivers");
     } catch (error) {
       setSubmitError(
-        error instanceof Error ? (translateError(error.message) ?? t("loginFailed")) : t("loginFailed"),
+        getAuthErrorMessage(error),
       );
     } finally {
       submitting.current = false;
@@ -143,30 +140,11 @@ export default function LoginForm() {
           variant="underline"
         />
 
-        <InputField
-          error={errors.password}
-          icon="password"
-          id="password"
-          label={t("password")}
-          onChange={(event) =>
-            updateValue("password", event.target.value)
-          }
-          placeholder={t("passwordPlaceholder")}
-          type="password"
-          value={values.password}
-          variant="underline"
-        />
+        <InputField error={errors.password} icon="password" id="password" label={t("password")} onChange={(event) => updateValue("password", event.target.value)} placeholder={t("passwordPlaceholder")} type="password" value={values.password} variant="underline" />
 
         <div className="flex items-center justify-between gap-4 text-[12px] text-text-secondary">
           <label className="flex items-center gap-2">
-            <input
-              checked={values.rememberMe}
-              className="size-4 rounded border-border text-primary focus:ring-primary/20"
-              onChange={(event) =>
-                updateValue("rememberMe", event.target.checked)
-              }
-              type="checkbox"
-            />
+            <input checked={values.rememberMe} className="size-4 rounded border-border text-primary focus:ring-primary/20" onChange={(event) => updateValue("rememberMe", event.target.checked)} type="checkbox" />
             {t("rememberMe")}
           </label>
 

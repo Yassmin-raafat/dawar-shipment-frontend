@@ -24,16 +24,12 @@ export function getAuthUser(): AuthUser | null {
   if (!stored) return null;
   try {
     const user: unknown = JSON.parse(stored);
-    if (typeof user === "object" && user !== null && "name" in user && "email" in user && typeof user.name === "string" && typeof user.email === "string") {
-      return { name: user.name, email: user.email };
+    if (typeof user === "object" && user !== null) {
+      const record = user as Record<string, unknown>;
+      if (typeof record.name === "string" && typeof record.email === "string") return { name: record.name, email: record.email };
     }
   } catch {
     // A malformed profile must not prevent token initialization.
   }
   return null;
-}
-
-// Mock profile lookup until the API supplies the authenticated user's name.
-export function getMockProfileName(email: string) {
-  return localStorage.getItem("dawar_mock_profile:" + email.trim().toLowerCase());
 }
