@@ -126,7 +126,7 @@
     "orderId": "Order ID",
     "route": "Route",
     "status": "Status",
-    "allStatuses": "All statuses",
+    "allStatuses": "All statuses", "recipientUnavailable": "Recipient not available", "driverUnavailable": "Driver not available", "noDriverAssigned": "No driver assigned",
     "PENDING_REVIEW": "Pending review",
     "ACTIVE": "Active",
     "REJECTED": "Rejected",
@@ -254,8 +254,9 @@
   },
   "orders": {
     "title": "Orders", "subtitle": "Track and manage your deliveries", "search": "Search orders", "searchPlaceholder": "Search by ID, driver, origin, or destination", "filter": "Filter orders", "mapLabel": "Order route map", "mapLoading": "Loading order map...", "mapUnavailable": "The order map is unavailable right now.", "mapError": "The order map could not be loaded. Please refresh and try again.", "orderDetails": "Order Details", "recipient": "Recipient", "driver": "Driver", "pickup": "Pickup", "delivery": "Delivery destination", "baseFee": "Base shipping fee", "tax": "Tax", "totalFee": "Total delivery fee", "driverDetails": "Driver Details", "loadError": "Could not load orders", "retry": "Retry", "empty": "No orders available", "noResults": "No orders match your search.",
-    "summary": { "total": "Total Orders", "delivered": "Delivered Orders", "pending": "Pending Orders", "inTransit": "In-Transit Orders" },
-    "status": { "Delivered": "Delivered", "Pending": "Pending", "In Transit": "In Transit" }
+    "summary": { "total": "Total Orders", "delivered": "Delivered Orders", "pending": "Finding Driver", "inTransit": "In-Transit Orders" },
+    "allStatuses": "All statuses", "recipientUnavailable": "Recipient not available", "driverUnavailable": "Driver not available", "noDriverAssigned": "No driver assigned",
+    "status": { "ASSIGNED": "Assigned", "ON_THE_WAY": "In transit", "DELIVERED": "Delivered", "FINDING_DRIVER": "Finding driver" }
   },
   "userDetails": { "title": "User details", "breadcrumb": "Users", "view": "View", "back": "Back to Users", "loading": "Loading user details", "notFound": "User not found", "loadError": "Could not load user details", "notFoundDescription": "This user does not exist or is no longer available.", "retryDescription": "Please try again.", "retry": "Retry", "options": "User options", "contact": "Contact user", "activeShipment": "Current Active Shipment", "shipmentId": "Shipment ID:", "assignedDriver": "Assigned Driver", "from": "From", "to": "To", "fee": "Fee", "originLabel": "Zayed", "destinationLabel": "5th Settlement Hub", "recentShipments": "Recent Shipments", "viewAll": "View All", "orderId": "Order ID", "dateTime": "Date & Time", "action": "Action", "view": "View", "summary": { "totalOrders": "Total Orders", "fulfillment": "fulfillment", "spend": "Logistics Spend", "topClient": "Top Tier Client", "active": "Active In Progress", "shipment": "shipment", "inQueue": "In delivery queue" }, "status": { "label": "Status", "inProgress": "In Progress", "delivered": "Delivered" } }
 }

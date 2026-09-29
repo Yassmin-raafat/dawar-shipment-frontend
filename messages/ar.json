@@ -126,7 +126,7 @@
     "orderId": "رقم الطلب",
     "route": "المسار",
     "status": "الحالة",
-    "allStatuses": "كل الحالات",
+    "allStatuses": "كل الحالات", "recipientUnavailable": "بيانات المستلم غير متاحة", "driverUnavailable": "بيانات السائق غير متاحة", "noDriverAssigned": "لم يتم تعيين سائق",
     "PENDING_REVIEW": "قيد المراجعة",
     "ACTIVE": "نشط",
     "REJECTED": "مرفوض",
@@ -254,8 +254,9 @@
   },
   "orders": {
     "title": "الطلبات", "subtitle": "تتبع شحناتك وأدر عمليات التسليم", "search": "البحث في الطلبات", "searchPlaceholder": "ابحث بالرقم أو السائق أو نقطة الانطلاق أو الوجهة", "filter": "تصفية الطلبات", "mapLabel": "خريطة مسار الطلب", "mapLoading": "جارٍ تحميل خريطة الطلب...", "mapUnavailable": "خريطة الطلب غير متاحة حاليًا.", "mapError": "تعذر تحميل خريطة الطلب. حدّث الصفحة وحاول مرة أخرى.", "orderDetails": "تفاصيل الطلب", "recipient": "المستلم", "driver": "السائق", "pickup": "الاستلام", "delivery": "وجهة التسليم", "baseFee": "رسوم الشحن الأساسية", "tax": "الضريبة", "totalFee": "إجمالي رسوم التسليم", "driverDetails": "تفاصيل السائق", "loadError": "تعذر تحميل الطلبات", "retry": "إعادة المحاولة", "empty": "لا توجد طلبات", "noResults": "لا توجد طلبات تطابق بحثك.",
-    "summary": { "total": "إجمالي الطلبات", "delivered": "الطلبات المسلّمة", "pending": "الطلبات المعلّقة", "inTransit": "الطلبات قيد التوصيل" },
-    "status": { "Delivered": "تم التسليم", "Pending": "معلّق", "In Transit": "قيد التوصيل" }
+    "summary": { "total": "إجمالي الطلبات", "delivered": "الطلبات المسلّمة", "pending": "بانتظار العثور على سائق", "inTransit": "الطلبات قيد التوصيل" },
+    "allStatuses": "كل الحالات", "recipientUnavailable": "بيانات المستلم غير متاحة", "driverUnavailable": "بيانات السائق غير متاحة", "noDriverAssigned": "لم يتم تعيين سائق",
+    "status": { "ASSIGNED": "تم الإسناد", "ON_THE_WAY": "قيد التوصيل", "DELIVERED": "تم التسليم", "FINDING_DRIVER": "جارٍ العثور على سائق" }
   },
   "userDetails": { "title": "تفاصيل المستخدم", "breadcrumb": "المستخدمون", "view": "عرض", "back": "العودة إلى المستخدمين", "loading": "جارٍ تحميل تفاصيل المستخدم", "notFound": "المستخدم غير موجود", "loadError": "تعذر تحميل تفاصيل المستخدم", "notFoundDescription": "هذا المستخدم غير موجود أو لم يعد متاحًا.", "retryDescription": "يرجى المحاولة مرة أخرى.", "retry": "إعادة المحاولة", "options": "خيارات المستخدم", "contact": "التواصل مع المستخدم", "activeShipment": "الشحنة الحالية النشطة", "shipmentId": "معرّف الشحنة:", "assignedDriver": "السائق المعيّن", "from": "من", "to": "إلى", "fee": "الرسوم", "originLabel": "الشيخ زايد", "destinationLabel": "مركز التجمع الخامس", "recentShipments": "الشحنات الأخيرة", "viewAll": "عرض الكل", "orderId": "معرّف الطلب", "dateTime": "التاريخ والوقت", "action": "إجراء", "view": "عرض", "summary": { "totalOrders": "إجمالي الطلبات", "fulfillment": "نسبة الإنجاز", "spend": "الإنفاق اللوجستي", "topClient": "عميل مميز", "active": "نشط قيد التنفيذ", "shipment": "شحنة", "inQueue": "في قائمة التوصيل" }, "status": { "label": "الحالة", "inProgress": "قيد التنفيذ", "delivered": "تم التسليم" } }
 }

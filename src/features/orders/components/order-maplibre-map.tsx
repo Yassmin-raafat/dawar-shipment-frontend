@@ -38,17 +38,17 @@ function createMarkerElement(color: string, label: string) {
 }
 
 function updateOrderMap(map: MapLibreMap, markers: { pickup: Marker | null; destination: Marker | null }, order: Order, pickupLabel: string, destinationLabel: string) {
-  const pickup: [number, number] = [order.coordinates.origin[1], order.coordinates.origin[0]];
-  const destination: [number, number] = [order.coordinates.destination[1], order.coordinates.destination[0]];
+  const pickup: [number, number] = [order.pickupLng, order.pickupLat];
+  const destination: [number, number] = [order.deliveryLng, order.deliveryLat];
   const route: Feature<LineString> = { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: [pickup, destination] } };
 
   (map.getSource(routeSourceId) as GeoJSONSource | undefined)?.setData(route);
 
-  if (markers.pickup) markers.pickup.setLngLat(pickup).setPopup(new maplibregl.Popup({ offset: 20 }).setText(`${pickupLabel}: ${order.origin}`));
-  else markers.pickup = new maplibregl.Marker({ element: createMarkerElement("#0066ff", pickupLabel) }).setLngLat(pickup).setPopup(new maplibregl.Popup({ offset: 20 }).setText(`${pickupLabel}: ${order.origin}`)).addTo(map);
+  if (markers.pickup) markers.pickup.setLngLat(pickup).setPopup(new maplibregl.Popup({ offset: 20 }).setText(`${pickupLabel}: ${order.pickupAddress}`));
+  else markers.pickup = new maplibregl.Marker({ element: createMarkerElement("#0066ff", pickupLabel) }).setLngLat(pickup).setPopup(new maplibregl.Popup({ offset: 20 }).setText(`${pickupLabel}: ${order.pickupAddress}`)).addTo(map);
 
-  if (markers.destination) markers.destination.setLngLat(destination).setPopup(new maplibregl.Popup({ offset: 20 }).setText(`${destinationLabel}: ${order.destination}`));
-  else markers.destination = new maplibregl.Marker({ element: createMarkerElement("#10b981", destinationLabel) }).setLngLat(destination).setPopup(new maplibregl.Popup({ offset: 20 }).setText(`${destinationLabel}: ${order.destination}`)).addTo(map);
+  if (markers.destination) markers.destination.setLngLat(destination).setPopup(new maplibregl.Popup({ offset: 20 }).setText(`${destinationLabel}: ${order.deliveryAddress}`));
+  else markers.destination = new maplibregl.Marker({ element: createMarkerElement("#10b981", destinationLabel) }).setLngLat(destination).setPopup(new maplibregl.Popup({ offset: 20 }).setText(`${destinationLabel}: ${order.deliveryAddress}`)).addTo(map);
 
   map.fitBounds([pickup, destination], { padding: 56, maxZoom: 13, duration: 0 });
 }

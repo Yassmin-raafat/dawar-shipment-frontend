@@ -18,7 +18,7 @@ const MapLibreOrderMap = dynamic(() => import("./order-maplibre-map"), {
 export default function OrderMap({ order, label }: { order: Order; label: string }) {
   const t = useTranslations("orders");
 
-  if (!order.coordinates?.origin || !order.coordinates?.destination) {
+  if (!Number.isFinite(order.pickupLat) || !Number.isFinite(order.pickupLng) || !Number.isFinite(order.deliveryLat) || !Number.isFinite(order.deliveryLng)) {
     return <section aria-label={label} className="grid h-full min-h-[650px] place-items-center rounded-2xl border border-border/40 bg-secondary px-6 text-center text-xs text-text-secondary">{t("mapUnavailable")}</section>;
   }
 
