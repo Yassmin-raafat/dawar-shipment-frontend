@@ -20,6 +20,6 @@ export function useCreateConversation() {
       void queryClient.invalidateQueries({ queryKey: conversationsQueryKey });
       toast.success(t("conversationReady"));
     },
-    onError: (error) => toast.error(translateError(error.message, "createError")),
+    onError: (error) => toast.error(translateError(error, "createError")),
   });
 }

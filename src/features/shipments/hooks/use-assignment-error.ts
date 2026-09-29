@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { getApiErrorMessage } from "@/lib/get-api-error-message";
 
 const errorKeys: Record<string, string> = {
   "You are offline. Reconnect and try again.": "offline",
@@ -9,5 +10,8 @@ const errorKeys: Record<string, string> = {
 
 export function useAssignmentError() {
   const t = useTranslations("shipmentAssignment");
-  return (message?: string) => t(message && Object.hasOwn(errorKeys, message) ? errorKeys[message] : "assignError");
+  return (error: unknown) => {
+    const message = getApiErrorMessage(error, t("assignError"));
+    return Object.hasOwn(errorKeys, message) ? t(errorKeys[message]) : message;
+  };
 }

@@ -5,9 +5,10 @@ import DriversTableSkeleton from "@/features/drivers/components/drivers-table-sk
 import DriversTable from "@/features/drivers/components/drivers-table";
 import DriversToolbar from "@/features/drivers/components/drivers-toolbar";
 import { useDrivers } from "@/features/drivers/hooks/use-drivers";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import useDebounce from "@/hooks/use-debounce";
+import type { DriverStatus } from "@/features/drivers/types/driver";
 
 const PAGE_SIZE = 10;
 
@@ -16,34 +17,22 @@ export default function DriversPage() {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery);
+  const [status, setStatus] = useState<DriverStatus | "">("");
   const [isAddDriverOpen, setIsAddDriverOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-  const { data: drivers = [], isError, isLoading, refetch } = useDrivers();
-
-  const filteredDrivers = useMemo(() => {
-    const normalizedQuery = debouncedSearchQuery.trim().toLowerCase();
-
-    if (!normalizedQuery) {
-      return drivers;
-    }
-
-    return drivers.filter((driver) => {
-      return [
-        driver.name,
-        driver.phone,
-        driver.vehicle,
-        driver.id,
-      ].some((value) => value.toLowerCase().includes(normalizedQuery));
-    });
-  }, [drivers, debouncedSearchQuery]);
-
-  const pageCount = Math.max(1, Math.ceil(filteredDrivers.length / PAGE_SIZE));
-  const currentPage = Math.min(page, pageCount);
+  const { data, isError, isLoading, refetch } = useDrivers({ page, size: PAGE_SIZE, search: debouncedSearchQuery.trim() || undefined, status: status || undefined });
+  const drivers = data?.data ?? [];
+  const pagination = data?.pagination;
+  const currentPage = pagination?.currentPage ?? page;
   const startIndex = (currentPage - 1) * PAGE_SIZE;
-  const paginatedDrivers = filteredDrivers.slice(startIndex, startIndex + PAGE_SIZE);
 
   function handleSearchChange(value: string) {
     setSearchQuery(value);
+    setPage(1);
+  }
+
+  function handleStatusChange(value: DriverStatus | "") {
+    setStatus(value);
     setPage(1);
   }
 
@@ -53,13 +42,15 @@ export default function DriversPage() {
         onAddDriverClick={() => { setSuccessMessage(""); setIsAddDriverOpen(true); }}
         onSearchChange={handleSearchChange}
         searchValue={searchQuery}
+        status={status}
+        onStatusChange={handleStatusChange}
       />
 
       {successMessage && <p role="status" className="mt-3 shrink-0 text-xs text-success">{successMessage}</p>}
       {isAddDriverOpen ? <DriverModal onClose={() => setIsAddDriverOpen(false)} onSuccess={(driver) => setSuccessMessage(driver.name + " was added successfully.")} /> : null}
 
       <section className="mt-7 flex min-h-0 flex-1 flex-col">
-        <div key={`${currentPage}:${searchQuery}`} role="region" aria-label={t("table")} tabIndex={0} className="min-h-0 flex-1 overflow-auto overscroll-contain focus-visible:outline-primary">
+        <div key={`${currentPage}:${searchQuery}:${status}`} role="region" aria-label={t("table")} tabIndex={0} className="min-h-0 flex-1 overflow-auto overscroll-contain focus-visible:outline-primary">
         {isLoading ? <DriversTableSkeleton rows={PAGE_SIZE} /> : null}
 
         {isError ? (
@@ -69,18 +60,17 @@ export default function DriversPage() {
           </div>
         ) : null}
 
-        {!isLoading && !isError ? <DriversTable drivers={paginatedDrivers} emptyMessage={searchQuery ? t("empty") : t("noDrivers")} /> : null}
+        {!isLoading && !isError ? <DriversTable drivers={drivers} emptyMessage={searchQuery || status ? t("empty") : t("noDrivers")} /> : null}
         </div>
         {!isLoading && !isError ? (
             <div className="flex shrink-0 flex-col gap-3 pt-6 text-[11px] text-text-secondary sm:flex-row sm:items-center sm:justify-between">
               <p>
-                {t("showing", { from: filteredDrivers.length === 0 ? 0 : startIndex + 1, to: startIndex + paginatedDrivers.length, total: filteredDrivers.length })}
-                {filteredDrivers.length !== drivers.length ? t("filteredFrom", { total: drivers.length }) : ""}
+                {t("showing", { from: pagination?.totalElements === 0 ? 0 : startIndex + 1, to: startIndex + drivers.length, total: pagination?.totalElements ?? 0 })}
               </p>
               <div className="flex items-center gap-2">
                 <button
                   className="h-9 rounded-[8px] border border-border px-3 font-semibold text-text-secondary disabled:cursor-not-allowed disabled:text-text-muted"
-                  disabled={currentPage === 1}
+                  disabled={!pagination?.hasPrevPage}
                   onClick={() => setPage(currentPage - 1)}
                   type="button"
                 >
@@ -91,7 +81,7 @@ export default function DriversPage() {
                 </span>
                 <button
                   className="h-9 rounded-[8px] border border-border px-3 font-semibold text-text-secondary disabled:cursor-not-allowed disabled:text-text-muted"
-                  disabled={currentPage === pageCount}
+                  disabled={!pagination?.hasNextPage}
                   onClick={() => setPage(currentPage + 1)}
                   type="button"
                 >

@@ -5,14 +5,14 @@ import { useTranslations } from "next-intl";
 
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useAddDriver } from "@/features/drivers/hooks/use-add-driver";
+import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { addDriverSchema, updateDriverSchema, getDriverFieldErrors, type AddDriverPayload, type AddDriverErrors } from "@/features/drivers/schemas/add-driver-schema";
-import { useUpdateDriver } from "@/features/drivers/hooks/use-update-driver";
 import type { Driver } from "@/features/drivers/types/driver";
 
-type DriverModalProps = { driver?: Driver; onClose: () => void; onSuccess: (driver: Driver) => void };
+type DriverModalProps = { driver?: Driver; onClose: () => void; onSuccess: (driver: { name: string }) => void };
 const initialValues: AddDriverPayload = {
   name: "", phone: "", nationalId: "", hub: "Cairo Hub 4",
-  vehicle: "Mercedes-Benz", plateNumber: "", vehicleColor: "Arctic White",
+  vehicle: "Mercedes-Benz", vehicleType: "CAR", plateNumber: "", vehicleColor: "Arctic White",
 };
 const inputClass = "h-[30px] w-full min-w-0 rounded-xl border border-transparent bg-secondary px-3 text-[10px] text-text-primary outline-none placeholder:text-text-placeholder focus:border-primary focus:ring-2 focus:ring-primary/10";
 
@@ -22,12 +22,11 @@ export default function DriverModal({ driver, onClose, onSuccess }: DriverModalP
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [values, setValues] = useState<AddDriverPayload>(() => driver ? {
     name: driver.name, phone: driver.phone, nationalId: driver.nationalId ?? "", hub: driver.hub ?? "",
-    vehicle: driver.vehicle, plateNumber: driver.plateNumber ?? "", vehicleColor: driver.vehicleColor ?? "",
+    vehicle: driver.vehicle, vehicleType: "CAR", plateNumber: driver.plateNumber ?? "", vehicleColor: driver.vehicleColor ?? "",
   } : initialValues);
   const [errors, setErrors] = useState<AddDriverErrors>({});
   const addMutation = useAddDriver();
-  const updateMutation = useUpdateDriver(driver?.id ?? "");
-  const mutation = driver ? updateMutation : addMutation;
+  const mutation = addMutation;
   const submitting = useRef(false);
 
   useEffect(() => {
@@ -78,7 +77,7 @@ export default function DriverModal({ driver, onClose, onSuccess }: DriverModalP
     return <input id={fieldName} className={inputClass} value={values[fieldName]} placeholder={placeholder} aria-required={!driver || fieldName === "name"} aria-invalid={Boolean(errors[fieldName])} aria-describedby={errors[fieldName] ? fieldName + "-error" : undefined} onChange={(event) => updateValue(fieldName, event.target.value)} />;
   }
 
-  function select(fieldName: "hub" | "vehicle" | "vehicleColor", options: string[]) {
+  function select(fieldName: "hub" | "vehicle" | "vehicleType" | "vehicleColor", options: string[]) {
     return <div className="relative">
       {fieldName === "vehicleColor" && <span aria-hidden="true" className="absolute start-3 top-2.5 size-2.5 rounded-full border border-border/30" style={{ backgroundColor: values.vehicleColor === "Arctic White" ? "white" : values.vehicleColor === "Black" ? "#222" : "#b8bdc4" }} />}
       <select id={fieldName} className={inputClass + " appearance-none pe-8" + (fieldName === "vehicleColor" ? " ps-7" : "")} value={values[fieldName]} aria-invalid={Boolean(errors[fieldName])} aria-describedby={errors[fieldName] ? fieldName + "-error" : undefined} onChange={(event) => updateValue(fieldName, event.target.value)}>
@@ -116,7 +115,7 @@ export default function DriverModal({ driver, onClose, onSuccess }: DriverModalP
           {photo("driverPhoto", t("driverPhoto"))}
           {field("name", t("fullName"), textInput("name", t("nameExample")), true)}
           <div className="grid grid-cols-1 gap-3 min-[380px]:grid-cols-2">
-            {field("phone", t("phone"), <div className="relative">{!driver && <span className="absolute start-3 top-2 text-[10px] text-[#7387a5]">+20</span>}<input id="phone" type="tel" className={inputClass + (driver ? "" : " ps-10")} value={values.phone} placeholder="100 123 4567" aria-required="true" aria-invalid={Boolean(errors.phone)} aria-describedby={errors.phone ? "phone-error" : undefined} onChange={(event) => updateValue("phone", event.target.value)} /></div>, true)}
+            {field("phone", t("phone"), <input id="phone" type="tel" className={inputClass} value={values.phone} placeholder="01234567890" aria-required="true" aria-invalid={Boolean(errors.phone)} aria-describedby={errors.phone ? "phone-error" : undefined} onChange={(event) => updateValue("phone", event.target.value)} />, true)}
             {field("nationalId", t("nationalId"), textInput("nationalId", t("idExample")), !driver)}
           </div>
           {field("hub", t("hub"), select("hub", ["Cairo Hub 4", "Giza Hub", "Alexandria Hub"]))}
@@ -127,11 +126,12 @@ export default function DriverModal({ driver, onClose, onSuccess }: DriverModalP
           {photo("vehiclePhoto", t("vehiclePhoto"))}
           <div className="grid grid-cols-1 gap-3 min-[380px]:grid-cols-2">
             {field("vehicle", t("vehicle"), select("vehicle", ["Mercedes-Benz", "Ford", "Peugeot", "Renault", "Iveco", "Fiat", "Nissan", "Toyota", "Hyundai"]), true)}
+            {field("vehicleType", t("vehicleType"), select("vehicleType", ["CAR", "VAN", "SCOOTER", "TRUCK"]), true)}
             {field("plateNumber", t("plate"), textInput("plateNumber", t("plateExample")), !driver)}
           </div>
           {field("vehicleColor", t("color"), select("vehicleColor", ["Arctic White", "Black", "Silver"]))}
         </fieldset>
-        {mutation.isError && <p role="alert" className="mt-3 text-[11px] text-destructive">{translateError(mutation.error.message)}</p>}
+        {mutation.isError && <p role="alert" className="mt-3 text-[11px] text-destructive">{translateError(getApiErrorMessage(mutation.error, t("addError")), "addError")}</p>}
         <div className="flex justify-end gap-2 pt-3">
           <button type="button" disabled={mutation.isPending} onClick={onClose} className="h-[30px] rounded-lg border border-[#e1e8f0] px-4 text-[10px] text-[#34445f] disabled:opacity-50">{t("cancel")}</button>
           <button type="submit" disabled={mutation.isPending} className="h-[30px] rounded-lg bg-primary px-5 text-[10px] font-medium text-primary-foreground hover:bg-primary-hover disabled:cursor-wait disabled:opacity-60">{driver ? (mutation.isPending ? t("saving") : t("save")) : (mutation.isPending ? t("adding") : t("add"))}</button>

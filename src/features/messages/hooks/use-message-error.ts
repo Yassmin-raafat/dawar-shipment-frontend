@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { getApiErrorMessage } from "@/lib/get-api-error-message";
 
 // Translate known service errors at the presentation boundary; services stay locale-neutral.
 const errorKeys = {
@@ -10,10 +11,11 @@ const errorKeys = {
 
 export function useMessageError() {
   const t = useTranslations("messages");
-  return (message: string | undefined, fallback: "sendError" | "createError" | "usersError" | "messagesError" | "conversationsUnavailable") => {
+  return (error: unknown, fallback: "sendError" | "createError" | "usersError" | "messagesError" | "conversationsUnavailable") => {
+    const message = getApiErrorMessage(error, "");
     const key = message && Object.hasOwn(errorKeys, message)
       ? errorKeys[message as keyof typeof errorKeys]
       : fallback;
-    return t(key);
+    return Object.hasOwn(errorKeys, message) ? t(key) : message || t(key);
   };
 }

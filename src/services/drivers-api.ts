@@ -1,5 +1,5 @@
-import type { Driver } from "@/features/drivers/types/driver";
-import { getAssignedShipments } from "@/services/shipments-api";
+import type { Driver, DriverDetails, DriverListItem, DriversPageResponse, DriverStatus } from "@/features/drivers/types/driver";
+import api from "@/lib/axios";
 import { addDriverSchema, updateDriverSchema, type AddDriverPayload } from "@/features/drivers/schemas/add-driver-schema";
 
 const drivers: Driver[] = [
@@ -190,12 +190,16 @@ const drivers: Driver[] = [
   },
 ];
 
-export async function getDrivers() {
-  await new Promise((resolve) => {
-    setTimeout(resolve, 500);
+export async function getDrivers(params: { page: number; size: number; search?: string; status?: DriverStatus }): Promise<DriversPageResponse> {
+  const { data } = await api.get<{ status: string; message: string; data: DriverListItem[]; pagination: DriversPageResponse["pagination"] }>("/api/v1/admins/drivers", {
+    params: {
+      page: params.page,
+      size: params.size,
+      ...(params.search ? { search: params.search } : {}),
+      ...(params.status ? { status: params.status } : {}),
+    },
   });
-
-  return drivers.map((driver) => ({ ...driver, assignedShipments: getAssignedShipments(driver.id) }));
+  return { data: data.data, pagination: data.pagination };
 }
 
 function readPhoto(file?: File): Promise<string | undefined> {
@@ -215,39 +219,35 @@ export class DriverNotFoundError extends Error {
   }
 }
 
-export async function getDriverById(id: string): Promise<Driver> {
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  const driver = drivers.find((item) => item.id === id);
-  if (!driver) throw new DriverNotFoundError();
-  return { ...driver, assignedShipments: getAssignedShipments(id) };
+export async function getDriverById(userId: string): Promise<DriverDetails> {
+  try {
+    const { data } = await api.get<{ status: string; message: string; data: DriverDetails }>(`/api/v1/admins/drivers/${encodeURIComponent(userId)}`);
+    return data.data;
+  } catch (error) {
+    if (error instanceof Error && "response" in error && (error as { response?: { status?: number } }).response?.status === 404) throw new DriverNotFoundError();
+    throw error;
+  }
 }
 
-// In-memory mock: new drivers remain available to refetches until a full reload.
-export async function addDriver(payload: AddDriverPayload): Promise<Driver> {
+export async function updateDriverStatus(userId: string, status: DriverStatus): Promise<{ status: DriverStatus }> {
+  const { data } = await api.patch<{ status: string; message: string; data: { newDriver: { id: string; userId: string; status: DriverStatus } } }>(`/api/v1/admins/drivers/${encodeURIComponent(userId)}/status`, { status });
+  return { status: data.data.newDriver.status };
+}
+
+export async function addDriver(payload: AddDriverPayload): Promise<{ name: string }> {
   const values = addDriverSchema.parse(payload);
-  await new Promise((resolve) => setTimeout(resolve, 700));
-  const [avatarUrl, vehiclePhotoUrl] = await Promise.all([
-    readPhoto(values.driverPhoto), readPhoto(values.vehiclePhoto),
-  ]);
-  if (drivers.some((driver) => driver.nationalId === values.nationalId)) {
-    throw new Error("A driver with this National ID / License already exists.");
-  }
-  const driver: Driver = {
-    id: "DRV-" + String(drivers.length + 1).padStart(3, "0"),
-    name: values.name,
-    phone: values.phone,
-    vehicle: values.vehicle,
-    nationalId: values.nationalId,
-    hub: values.hub,
-    plateNumber: values.plateNumber,
-    vehicleColor: values.vehicleColor,
-    avatarUrl,
-    vehiclePhotoUrl,
-    rating: 0,
-    reliability: 0,
-  };
-  drivers.unshift(driver);
-  return driver;
+  const formData = new FormData();
+  formData.append("phoneNumber", values.phone);
+  formData.append("name", values.name);
+  formData.append("type", values.vehicleType);
+  formData.append("plateNumber", values.plateNumber);
+  formData.append("color", values.vehicleColor);
+  formData.append("brand", values.vehicle);
+  formData.append("nationalId", values.nationalId);
+  if (values.driverPhoto) formData.append("driverPhoto", values.driverPhoto);
+  if (values.vehiclePhoto) formData.append("vehiclePhoto", values.vehiclePhoto);
+  const { data } = await api.post<{ status: string; message: string; data?: Pick<DriverListItem, "name"> }>("/api/v1/admins/drivers", formData, { headers: { "Content-Type": "multipart/form-data" } });
+  return { name: data.data?.name ?? values.name };
 }
 
 export async function updateDriver(id: string, payload: AddDriverPayload): Promise<Driver> {
@@ -264,5 +264,5 @@ export async function updateDriver(id: string, payload: AddDriverPayload): Promi
     hub: values.hub, vehicle: values.vehicle, plateNumber: values.plateNumber, vehicleColor: values.vehicleColor,
     avatarUrl: avatarUrl ?? drivers[index].avatarUrl, vehiclePhotoUrl: vehiclePhotoUrl ?? drivers[index].vehiclePhotoUrl,
   };
-  return { ...drivers[index], assignedShipments: getAssignedShipments(id) };
+  return { ...drivers[index] };
 }

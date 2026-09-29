@@ -9,8 +9,8 @@ import { useAssignShipment } from "@/features/shipments/hooks/use-assign-shipmen
 import type { Shipment } from "@/features/shipments/types/shipment";
 import useDebounce from "@/hooks/use-debounce";
 
-export default function AssignShipmentModal({ driverId, driverName, onClose, onSuccess }: {
-  driverId: string; driverName: string; onClose: () => void; onSuccess: (shipment: Shipment) => void;
+export default function AssignShipmentModal({ driverId, driverName, driverVehicleType, onClose, onSuccess }: {
+  driverId: string; driverName: string; driverVehicleType?: string; onClose: () => void; onSuccess: () => void;
 }) {
   const t = useTranslations("shipmentAssignment");
   const translateError = useAssignmentError();
@@ -18,18 +18,11 @@ export default function AssignShipmentModal({ driverId, driverName, onClose, onS
   const submitting = useRef(false);
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search);
-  const [hub, setHub] = useState("Cairo Hub 4");
-  const [status, setStatus] = useState("");
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const [selected, setSelected] = useState<Shipment>();
-  const query = useAvailableShipments();
+  const query = useAvailableShipments({ page: 1, size: 20, search: debouncedSearch.trim() || undefined });
   const mutation = useAssignShipment();
-  const shipments = query.data ?? [];
-  const term = debouncedSearch.trim().toLowerCase().replace(/^#/, "");
-  const hubs = Array.from(new Set([hub, ...shipments.map((shipment) => shipment.origin)])).filter(Boolean);
-  const visible = shipments.filter((shipment) => (!hub || shipment.origin === hub)
-    && (!status || shipment.status === status)
-    && [shipment.id, shipment.recipient, shipment.origin, shipment.destination].some((value) => value.toLowerCase().includes(term)));
+  const shipments = query.data?.data ?? [];
+  const compatibleShipments = driverVehicleType ? shipments.filter((shipment) => shipment.vehicleType === driverVehicleType) : shipments;
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -44,8 +37,8 @@ export default function AssignShipmentModal({ driverId, driverName, onClose, onS
     if (!selected || submitting.current || mutation.isPending) return;
     submitting.current = true;
     try {
-      const shipment = await mutation.mutateAsync({ shipmentId: selected.id, driverId });
-      onSuccess(shipment);
+      await mutation.mutateAsync({ shipmentId: selected.id, userId: driverId });
+      onSuccess();
       onClose();
     } catch {
       // Keep selection and modal open; the mutation exposes the inline error.
@@ -66,33 +59,19 @@ export default function AssignShipmentModal({ driverId, driverName, onClose, onS
             <svg aria-hidden="true" className="pointer-events-none absolute start-4 top-3.5 size-4 text-text-placeholder" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg>
             <input type="search" value={search} disabled={mutation.isPending} onChange={(event) => setSearch(event.target.value)} placeholder={t("searchPlaceholder")} className="h-11 w-full rounded-full border border-transparent bg-secondary ps-10 pe-4 text-sm outline-none placeholder:text-text-placeholder focus:border-primary focus:ring-2 focus:ring-primary/10" />
           </label>
-          <label className="relative"><span className="sr-only">{t("originHub")}</span>
-            <select value={hub} disabled={mutation.isPending} onChange={(event) => setHub(event.target.value)} className="h-11 max-w-44 appearance-none rounded-full border border-transparent bg-secondary ps-4 pe-9 text-xs font-medium outline-none focus:border-primary focus:ring-2 focus:ring-primary/10">
-              <option value="">{t("allHubs")}</option>{hubs.map((origin) => <option key={origin} value={origin}>{origin}</option>)}
-            </select>
-            <svg aria-hidden="true" className="pointer-events-none absolute end-4 top-4 size-3 text-text-secondary" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="m4 6 4 4 4-4"/></svg>
-          </label>
-          <button type="button" disabled={mutation.isPending} aria-expanded={filtersOpen} aria-controls="shipment-filters" onClick={() => setFiltersOpen(!filtersOpen)} className={"inline-flex h-11 items-center gap-2 rounded-full px-4 text-xs font-medium outline-none focus-visible:ring-2 focus-visible:ring-primary/30 " + (status ? "bg-primary-muted text-primary" : "bg-secondary text-text-secondary")}>
-            <svg aria-hidden="true" className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"><path d="M4 4h16v3l-6 7v5l-4 2v-7L4 7V4Z"/></svg>{t("filters")}{status && <span className="sr-only">{t("activeFilters", { count: 1 })}</span>}
-          </button>
         </div>
-        {filtersOpen && <div id="shipment-filters" className="flex flex-wrap items-end gap-3 rounded-xl border border-border p-3">
-          <label className="flex-1 text-xs text-text-secondary">{t("shipmentStatus")}<select value={status} disabled={mutation.isPending} onChange={(event) => setStatus(event.target.value)} className="mt-2 block h-9 w-full rounded-lg bg-secondary px-3 text-xs outline-none focus:ring-2 focus:ring-primary/30"><option value="">{t("allStatuses")}</option><option value="Pending">{t("Pending")}</option><option value="Ready for Pickup">{t("Ready for Pickup")}</option></select></label>
-          <button type="button" disabled={mutation.isPending} onClick={() => { setHub(""); setStatus(""); setSearch(""); }} className="h-9 px-2 text-xs text-primary hover:underline">{t("clearFilters")}</button>
-        </div>}
         {query.isPending ? <p role="status" className="py-8 text-center text-sm text-text-secondary">{t("loading")}</p>
           : query.isError ? <div role="alert" className="py-6 text-center text-sm text-destructive">{t("loadError")} <button type="button" onClick={() => void query.refetch()} className="underline">{t("retry")}</button></div>
-          : !shipments.length ? <p role="status" className="py-8 text-center text-sm text-text-secondary">{t("empty")}</p>
-          : !visible.length ? <p role="status" className="py-8 text-center text-sm text-text-secondary">{t("noResults")}</p>
-          : <fieldset disabled={mutation.isPending} className="space-y-3"><legend className="sr-only">{t("selectOne")}</legend>{visible.map((shipment) => <label key={shipment.id} className={"flex cursor-pointer items-start gap-3 rounded-2xl border p-4 " + (selected?.id === shipment.id ? "border-primary/20 bg-primary-muted" : "border-border bg-card")}>
+          : !compatibleShipments.length ? <p role="status" className="py-8 text-center text-sm text-text-secondary">{t("noCompatibleShipments")}</p>
+          : <fieldset disabled={mutation.isPending} className="space-y-3"><legend className="sr-only">{t("selectOne")}</legend>{compatibleShipments.map((shipment) => <label key={shipment.id} className={"flex cursor-pointer items-start gap-3 rounded-2xl border p-4 " + (selected?.id === shipment.id ? "border-primary/20 bg-primary-muted" : "border-border bg-card")}>
             <input type="radio" name="shipment" value={shipment.id} checked={selected?.id === shipment.id} onChange={() => { setSelected(shipment); mutation.reset(); }} className="mt-1 size-4 shrink-0 accent-primary" />
-            <span className="min-w-0 flex-1"><span className="flex flex-wrap items-center justify-between gap-2"><span className="text-sm font-semibold">#{shipment.id}</span><span className={"rounded-full px-2 py-0.5 text-[10px] " + (shipment.status === "Ready for Pickup" ? "bg-emerald-50 text-emerald-600" : "bg-secondary text-text-secondary")}>{t(shipment.status)}</span></span>
-              <span className="mt-2 block text-xs">{shipment.origin} <span className="text-text-muted">→</span> {shipment.destination}</span>
-              <span className="mt-2 flex flex-wrap justify-between gap-2 border-t border-border/30 pt-2 text-xs"><span><span className="text-text-muted">{t("recipient")}</span>{shipment.recipient}</span><span className="font-semibold">{t("amount", { amount: shipment.fee })}</span></span>
+            <span className="min-w-0 flex-1"><span className="flex flex-wrap items-center justify-between gap-2"><span className="text-sm font-semibold">#{shipment.orderNumber}</span><span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] text-text-secondary">{shipment.status}</span></span>
+              <span className="mt-2 block text-xs">{shipment.pickupAddress} <span className="text-text-muted">→</span> {shipment.deliveryAddress}</span>
+              <span className="mt-2 flex flex-wrap justify-between gap-2 border-t border-border/30 pt-2 text-xs"><span><span className="text-text-muted">{t("recipient")}</span>{shipment.recipientName || t("notRecorded")}</span><span className="font-semibold">{t("amount", { amount: shipment.deliveryFee })}</span></span>
             </span>
           </label>)}</fieldset>}
-        {selected && <div className="flex flex-wrap justify-between gap-2 rounded-xl bg-primary-muted p-3 text-xs font-medium text-primary"><span>{t("selected", { count: 1, id: selected.id })}</span><span>{t("totalFee", { amount: selected.fee })}</span></div>}
-        {mutation.isError && <p role="alert" className="text-sm text-destructive">{translateError(mutation.error.message)}</p>}
+        {selected && <div className="flex flex-wrap justify-between gap-2 rounded-xl bg-primary-muted p-3 text-xs font-medium text-primary"><span>{t("selected", { count: 1, id: selected.orderNumber })}</span><span>{t("totalFee", { amount: selected.deliveryFee })}</span></div>}
+        {mutation.isError && <p role="alert" className="text-sm text-destructive">{translateError(mutation.error)}</p>}
       </div>
       <footer className="flex justify-end gap-3 border-t border-border/50 bg-secondary/30 px-6 py-5">
         <button type="button" disabled={mutation.isPending} onClick={onClose} className="rounded-xl bg-secondary px-5 py-2.5 text-sm disabled:opacity-50">{t("cancel")}</button>

@@ -14,13 +14,15 @@ export function useAssignShipment() {
     mutationFn: assignShipment,
     networkMode: "always",
     retry: false,
-    onSuccess: async (shipment) => {
+    onSuccess: async (_result, variables) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: driversQueryKey }),
         queryClient.invalidateQueries({ queryKey: shipmentsQueryKey }),
+        queryClient.invalidateQueries({ queryKey: ["driver-shipments", variables.userId] }),
+        queryClient.invalidateQueries({ queryKey: [...driversQueryKey, "detail", variables.userId] }),
       ]);
-      toast.success(t("success", { id: shipment.id }));
+      toast.success(t("success", { id: variables.shipmentId }));
     },
-    onError: (error) => toast.error(translateError(error.message)),
+    onError: (error) => toast.error(translateError(error)),
   });
 }

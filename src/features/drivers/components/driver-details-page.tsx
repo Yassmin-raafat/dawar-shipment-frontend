@@ -1,75 +1,46 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-
 import Image from "next/image";
-import AssignShipmentModal from "@/features/shipments/components/assign-shipment-modal";
-import DriverModal from "@/features/drivers/components/driver-modal";
 import Link from "next/link";
 import { useCallback, useRef, useState } from "react";
-import useClickOutside from "@/hooks/use-click-outside";
+import { useTranslations } from "next-intl";
+import AssignShipmentModal from "@/features/shipments/components/assign-shipment-modal";
+import EditDriverStatusModal from "@/features/drivers/components/edit-driver-status-modal";
 import { useDriver } from "@/features/drivers/hooks/use-driver";
+import { useDriverShipments } from "@/features/shipments/hooks/use-driver-shipments";
+import { useRecipientName } from "@/features/shipments/hooks/use-recipient-name";
+import useClickOutside from "@/hooks/use-click-outside";
 import { DriverNotFoundError } from "@/services/drivers-api";
-import { ActiveShipmentCard, AssignedVehicleCard, RecentDeliveries, ShiftActivity } from "@/features/drivers/components/driver-detail-cards";
 
-export default function DriverDetailsPage({ id, initialAssignShipmentOpen = false, initialEditOpen = false }: { id: string; initialAssignShipmentOpen?: boolean; initialEditOpen?: boolean }) {
+export default function DriverDetailsPage({ id, initialAssignShipmentOpen = false }: { id: string; initialAssignShipmentOpen?: boolean; initialEditOpen?: boolean }) {
   const t = useTranslations("driverDetails");
-  const { data: driver, isLoading, isError, error, refetch } = useDriver(id);
-  const [isAssignShipmentOpen, setIsAssignShipmentOpen] = useState(initialAssignShipmentOpen);
-  const [successMessage, setSuccessMessage] = useState<{ kind: "updated"; name: string } | { kind: "assigned"; name: string; id: string } | null>(null);
-  const [isEditOpen, setIsEditOpen] = useState(initialEditOpen);
-  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+  const driverQuery = useDriver(id);
+  const shipmentsQuery = useDriverShipments(id);
+  const activeCustomerId = shipmentsQuery.data?.find(({ status }) => status === "ASSIGNED" || status === "ON_THE_WAY")?.customerId;
+  const recipientQuery = useRecipientName(activeCustomerId);
+  const [assignOpen, setAssignOpen] = useState(initialAssignShipmentOpen);
+  const [editOpen, setEditOpen] = useState(false);
+  const [optionsOpen, setOptionsOpen] = useState(false);
   const optionsRef = useRef<HTMLDivElement>(null);
-  const closeOptions = useCallback(() => setIsOptionsOpen(false), []);
+  const closeOptions = useCallback(() => setOptionsOpen(false), []);
   useClickOutside(optionsRef, closeOptions);
 
-  if (isLoading) return <div role="status" aria-label={t("loading")} className="mx-3 space-y-4">
-    <div aria-hidden="true" className="h-24 animate-pulse rounded-2xl bg-secondary" />
-    <div aria-hidden="true" className="grid gap-3 lg:grid-cols-[2.1fr_1fr]"><div className="h-[440px] animate-pulse rounded-2xl bg-secondary"/><div className="space-y-3"><div className="h-44 animate-pulse rounded-2xl bg-secondary"/><div className="h-72 animate-pulse rounded-2xl bg-secondary"/></div></div>
-  </div>;
+  if (driverQuery.isLoading) return <div role="status" aria-label={t("loading")} className="mx-auto w-full max-w-[1280px] space-y-4 px-3 sm:px-4"><div className="h-20 animate-pulse rounded-2xl bg-secondary"/><div className="grid gap-4 lg:grid-cols-[2.1fr_1fr]"><div className="h-96 animate-pulse rounded-2xl bg-secondary"/><div className="h-44 animate-pulse rounded-2xl bg-secondary"/></div></div>;
+  if (driverQuery.isError || !driverQuery.data) return <section role="alert" className="mx-auto w-full max-w-[1280px] rounded-2xl bg-card px-6 py-12 text-center"><h1 className="text-lg font-semibold">{driverQuery.error instanceof DriverNotFoundError ? t("notFound") : t("loadError")}</h1><p className="mt-2 text-sm text-text-secondary">{driverQuery.error instanceof DriverNotFoundError ? t("notFoundDescription") : t("retryDescription")}</p><div className="mt-5 flex justify-center gap-5 text-sm text-primary"><Link href="/drivers">{t("back")}</Link>{!(driverQuery.error instanceof DriverNotFoundError) && <button type="button" onClick={() => void driverQuery.refetch()}>{t("retry")}</button>}</div></section>;
 
-  if (isError || !driver) return <section role="alert" className="mx-3 rounded-2xl bg-card px-6 py-12 text-center">
-    <h1 className="text-lg font-semibold">{error instanceof DriverNotFoundError ? t("notFound") : t("loadError")}</h1>
-    <p className="mt-2 text-sm text-text-secondary">{error instanceof DriverNotFoundError ? t("notFoundDescription") : t("retryDescription")}</p>
-    <div className="mt-5 flex justify-center gap-5 text-sm text-primary"><Link href="/drivers">{t("back")}</Link>{!(error instanceof DriverNotFoundError) && <button type="button" onClick={() => void refetch()}>{t("retry")}</button>}</div>
-  </section>;
+  const driver = driverQuery.data;
+  const activeShipment = shipmentsQuery.data?.find(({ status }) => status === "ASSIGNED" || status === "ON_THE_WAY");
+  const deliveries = shipmentsQuery.data?.filter(({ status }) => status === "DELIVERED") ?? [];
+  const initials = driver.name.split(" ").map((part) => part[0]).join("").slice(0, 2);
+  const amount = (value: string | number) => t("amount", { amount: Number(value) });
 
-  return <div className="mx-3 mb-6 space-y-4 text-text-primary">
-    <Link href="/drivers" className="inline-flex h-8 items-center gap-2 rounded-xl border border-border/60 bg-card px-3 text-[10px] font-medium text-text-secondary hover:bg-secondary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
-      <svg aria-hidden="true" className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="m12 5-7 7 7 7M5 12h14" /></svg>
-      {t("back")}
-    </Link>
-    <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-card px-5 py-5">
-      <div className="flex min-w-0 items-center gap-3">
-        {driver.avatarUrl ? <Image unoptimized src={driver.avatarUrl} alt={driver.name} width={48} height={48} className="size-12 rounded-full object-cover"/> : <div aria-hidden="true" className="grid size-12 shrink-0 place-items-center rounded-full bg-primary-muted text-sm font-semibold text-primary">{driver.name.split(" ").map((part) => part[0]).join("").slice(0, 2)}</div>}
-        <div><h1 className="text-[17px] font-semibold tracking-tight">{driver.name}</h1><p className="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-[#7387a5]"><span>{driver.role ? (t.has(driver.role) ? t(driver.role) : driver.role) : t("fleetCourier")}</span><span aria-hidden="true">•</span><svg aria-hidden="true" className="size-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>{driver.hub || t("hubMissing")}</span></p></div>
-      </div>
-      <div className="flex items-center gap-2">
-        <button type="button" onClick={() => { setSuccessMessage(null); setIsAssignShipmentOpen(true); }} className="inline-flex h-8 items-center gap-2 rounded-xl bg-primary px-3 text-[10px] font-medium text-primary-foreground hover:bg-primary-hover"><svg aria-hidden="true" className="size-3" viewBox="0 0 20 20" fill="none" stroke="currentColor"><path d="M10 3v14M3 10h14"/></svg>{t("assign")}</button>
-        <div ref={optionsRef} className="relative"><button type="button" aria-expanded={isOptionsOpen} aria-label={t("options")} onClick={() => setIsOptionsOpen((open) => !open)} className="grid size-8 cursor-pointer place-items-center rounded-xl border border-border/60 text-xs text-text-muted">···</button>{isOptionsOpen && <div className="absolute end-0 top-10 z-10 w-36 rounded-xl border border-border bg-card p-3 text-xs shadow-lg"><button type="button" onClick={() => { setIsOptionsOpen(false); setSuccessMessage(null); setIsEditOpen(true); }} className="text-primary">{t("edit")}</button></div>}</div>
-      </div>
-    </section>
-    {successMessage && <p role="status" className="rounded-xl bg-emerald-50 px-5 py-3 text-xs text-emerald-700">{t(successMessage.kind, successMessage)}</p>}
-    <div className="grid items-start gap-3 lg:grid-cols-[2.1fr_1fr]">
-      <div className="min-w-0 rounded-2xl bg-card">
-        <div className="flex flex-wrap gap-x-5 gap-y-3 border-b border-border/30 px-5 py-5 text-[10px]">
-          <a href={"tel:" + driver.phone.replace(/\s/g, "")} className="inline-flex items-center gap-2"><svg aria-hidden="true" className="size-3.5 text-[#8b9fba]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="m7 3 3 5-3 2a15 15 0 0 0 7 7l2-3 5 3-1 4C10 22 2 14 3 4l4-1Z"/></svg><bdi>{driver.phone}</bdi></a>
-          <span className="inline-flex items-center gap-2"><svg aria-hidden="true" className="size-3.5 text-[#8b9fba]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/></svg>{driver.email ? <a href={"mailto:" + driver.email}>{driver.email}</a> : t("emailMissing")}</span>
-          <span className="inline-flex items-center gap-2"><svg aria-hidden="true" className="size-3.5 text-[#8b9fba]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 3h8l4 4v14H6V3Zm8 0v5h4M9 12h6m-6 4h6"/></svg>{driver.licenseClass ? (t.has(driver.licenseClass) ? t(driver.licenseClass) : driver.licenseClass) : t("licenseMissing")}</span>
-        </div>
-        <ActiveShipmentCard shipment={driver.activeShipment}/>
-        {!!driver.assignedShipments?.length && <section className="border-b border-border/30 px-5 py-6">
-          <h2 className="text-xs font-semibold">{t("assignedShipments")}</h2>
-          <ul className="mt-4 space-y-3">{driver.assignedShipments.map((shipment) => <li key={shipment.id} className="rounded-xl bg-primary-muted p-3 text-xs">
-            <div className="flex justify-between gap-2 font-medium"><span>#{shipment.id}</span><span className="text-primary">{t("amount", { amount: shipment.fee })}</span></div>
-            <p className="mt-2">{shipment.origin} → {shipment.destination}</p><p className="mt-1 text-text-secondary">{t("recipientStatus", { name: shipment.recipient, status: t(shipment.status) })}</p>
-          </li>)}</ul>
-        </section>}
-        <RecentDeliveries key={id} deliveries={driver.recentDeliveries}/>
-      </div>
-      <div className="min-w-0 space-y-3"><AssignedVehicleCard driver={driver}/><ShiftActivity activities={driver.shiftActivity}/></div>
-    </div>
-    {isEditOpen && <DriverModal key={id} driver={driver} onClose={() => setIsEditOpen(false)} onSuccess={(updated) => setSuccessMessage({ kind: "updated", name: updated.name })} />}
-    {isAssignShipmentOpen && <AssignShipmentModal key={id} driverId={id} driverName={driver.name} onClose={() => setIsAssignShipmentOpen(false)} onSuccess={(shipment) => setSuccessMessage({ kind: "assigned", id: shipment.id, name: driver.name })} />}
+  return <div className="mx-auto mb-6 w-full max-w-[1280px] space-y-4 px-3 text-text-primary sm:px-4">
+    <Link href="/drivers" className="inline-flex h-8 items-center gap-2 rounded-xl border border-border/60 bg-card px-3 text-[10px] font-medium text-text-secondary hover:bg-secondary hover:text-primary"><svg aria-hidden="true" className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="m12 5-7 7 7 7M5 12h14"/></svg>{t("back")}</Link>
+    <section className="flex min-h-[76px] flex-wrap items-center justify-between gap-4 rounded-2xl bg-card px-5 py-4"><div className="flex min-w-0 items-center gap-3"><div aria-hidden="true" className="grid size-12 shrink-0 place-items-center rounded-full bg-primary-muted text-sm font-semibold text-primary">{initials}</div><div><h1 className="text-[17px] font-semibold tracking-tight">{driver.name}</h1><p className="mt-1 flex gap-2 text-[10px] text-[#7387a5]"><span>{t("fleetCourier")}</span><span>•</span><span>{driver.status.replace("_", " ")}</span></p></div></div><div className="flex items-center gap-2"><button type="button" onClick={() => setAssignOpen(true)} className="inline-flex h-8 items-center gap-2 rounded-xl bg-primary px-3 text-[10px] font-medium text-primary-foreground hover:bg-primary-hover">＋ {t("assign")}</button><div ref={optionsRef} className="relative"><button type="button" aria-label={t("options")} aria-expanded={optionsOpen} onClick={() => setOptionsOpen((open) => !open)} className="grid size-8 place-items-center rounded-xl border border-border/60 text-xs text-text-muted">···</button>{optionsOpen && <div className="absolute end-0 top-10 z-10 w-36 rounded-xl border border-border bg-card p-3 text-xs shadow-lg"><button type="button" onClick={() => { closeOptions(); setEditOpen(true); }} className="text-primary">{t("edit")}</button></div>}</div></div></section>
+    <div className="grid items-start gap-4 lg:grid-cols-[2.1fr_1fr]"><div className="min-w-0 space-y-4"><section className="flex min-h-12 flex-wrap items-center gap-x-5 gap-y-2 rounded-2xl bg-card px-5 py-3 text-[10px]"><a href={`tel:${driver.phoneNumber}`} className="inline-flex items-center gap-2">⌕ <bdi>{driver.phoneNumber}</bdi></a><span>★ {driver.rating}</span><span>● {driver.status.replace("_", " ")}</span><span>✉ {t("emailMissing")}</span></section>
+      <section className="rounded-2xl bg-card px-5 py-5"><h2 className="text-xs font-semibold">{t("activeShipment")}</h2>{shipmentsQuery.isPending ? <p className="py-6 text-xs text-text-secondary">{t("loading")}</p> : shipmentsQuery.isError ? <p className="py-6 text-xs text-destructive">{t("loadError")}</p> : activeShipment ? <><dl className="mt-3 grid grid-cols-2 gap-4 border-y border-border/30 py-3 sm:grid-cols-4"><div><dt className="text-[10px] text-[#8b9fba]">{t("recipient")}</dt><dd className="mt-1 text-xs font-medium">{recipientQuery.data ?? t("recipientUnavailable")}</dd></div><div><dt className="text-[10px] text-[#8b9fba]">{t("origin")}</dt><dd className="mt-1 text-xs font-medium">{activeShipment.pickupAddress}</dd></div><div><dt className="text-[10px] text-[#8b9fba]">{t("destination")}</dt><dd className="mt-1 text-xs font-medium">{activeShipment.deliveryAddress}</dd></div><div><dt className="text-[10px] text-[#8b9fba]">{t("fee")}</dt><dd className="mt-1 text-xs font-semibold text-primary">{amount(activeShipment.price)}</dd></div></dl><div className="mt-3 flex justify-between gap-4 text-[10px] text-[#7387a5]"><span>{activeShipment.pickupAddress}</span><span>{activeShipment.deliveryAddress}</span></div><div role="progressbar" aria-label={t("routeProgress")} aria-valuenow={activeShipment.status === "ON_THE_WAY" ? 55 : 15} className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-secondary"><div className="h-full rounded-full bg-primary" style={{ width: activeShipment.status === "ON_THE_WAY" ? "55%" : "15%" }}/></div></> : <p className="py-6 text-xs text-text-secondary">{t("noActiveShipment")}</p>}</section>
+      <section className="rounded-2xl bg-card px-5 py-5"><div className="flex justify-between"><h2 className="text-xs font-semibold">{t("recentDeliveries")}</h2>{deliveries.length > 3 && <span className="text-[10px] text-primary">{t("viewAll")}</span>}</div>{deliveries.length ? <div className="mt-3 overflow-x-auto"><table className="w-full min-w-[480px] text-start text-[10px]"><thead className="text-[#8b9fba]"><tr>{[t("orderId"), t("route"), t("fee"), t("status")].map((label) => <th scope="col" key={label} className="border-b border-border/30 px-2 py-3 font-normal">{label}</th>)}</tr></thead><tbody>{deliveries.slice(0, 3).map((shipment) => <tr key={shipment.id} className="border-b border-border/30 last:border-0"><td className="px-2 py-3">#{shipment.orderNumber}</td><td className="px-2 py-3 text-[#52647e]">{shipment.pickupAddress} → {shipment.deliveryAddress}</td><td className="px-2 py-3">{amount(shipment.price)}</td><td className="px-2 py-3"><span className="rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-600">{shipment.status}</span></td></tr>)}</tbody></table></div> : <p className="py-5 text-xs text-text-secondary">{t("noDeliveries")}</p>}</section></div>
+      <aside className="min-w-0 space-y-4"><section className="rounded-2xl bg-card p-5"><h2 className="text-xs font-semibold">{t("assignedVehicle")}</h2><div className="mt-5 flex min-h-16 items-center justify-between gap-4"><div><p className="text-[10px] text-primary">{driver.vehicleType}</p><p className="mt-1 text-xs font-semibold">{driver.vehicleBrand}</p></div><Image src="/image%20296.png" alt="" width={112} height={66} className="h-16 w-28 object-contain"/></div><dl className="mt-4 flex justify-between border-t border-border/40 pt-5 text-[10px]"><dt className="text-[#7387a5]">{t("licensePlate")}</dt><dd>{driver.plateNumber || t("notRecorded")}</dd></dl></section></aside></div>
+    {assignOpen && <AssignShipmentModal driverId={driver.userId} driverName={driver.name} driverVehicleType={driver.vehicleType} onClose={() => setAssignOpen(false)} onSuccess={() => { setAssignOpen(false); void shipmentsQuery.refetch(); }}/>} {editOpen && <EditDriverStatusModal userId={driver.userId} currentStatus={driver.status} onClose={() => setEditOpen(false)}/>}
   </div>;
 }

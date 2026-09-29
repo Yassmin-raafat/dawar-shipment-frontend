@@ -3,15 +3,17 @@ import { getAccessToken, removeAccessToken } from "@/features/auth/services/auth
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
-  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
 api.interceptors.request.use((config) => {
+  const requestPath = config.url ?? "";
+  const isPublicAuthRequest = requestPath === "/api/v1/admins/login" || requestPath === "/api/backend/api/v1/admins/login";
   const token = getAccessToken();
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  if (token && !isPublicAuthRequest) config.headers.Authorization = `Bearer ${token}`;
+  if (isPublicAuthRequest) delete config.headers.Authorization;
   return config;
 });
 

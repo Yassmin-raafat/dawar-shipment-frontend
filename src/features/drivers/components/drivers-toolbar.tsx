@@ -4,9 +4,11 @@ type DriversToolbarProps = {
   onAddDriverClick: () => void;
   onSearchChange: (value: string) => void;
   searchValue: string;
+  status: DriverStatus | "";
+  onStatusChange: (value: DriverStatus | "") => void;
 };
 
-export default function DriversToolbar({ onAddDriverClick, onSearchChange, searchValue }: DriversToolbarProps) {
+export default function DriversToolbar({ onAddDriverClick, onSearchChange, searchValue, status, onStatusChange }: DriversToolbarProps) {
   const t = useTranslations("drivers");
   return (
     <div className="flex shrink-0 flex-col gap-4 sm:flex-row sm:items-center">
@@ -22,6 +24,13 @@ export default function DriversToolbar({ onAddDriverClick, onSearchChange, searc
           value={searchValue}
         />
       </div>
+      <select aria-label={t("status")} value={status} onChange={(event) => onStatusChange(event.target.value as DriverStatus | "")} className="h-9 rounded-xl border border-border bg-card px-3 text-[12px] text-text-primary outline-none focus:border-ring">
+        <option value="">{t("allStatuses")}</option>
+        <option value="PENDING_REVIEW">{t("PENDING_REVIEW")}</option>
+        <option value="ACTIVE">{t("ACTIVE")}</option>
+        <option value="REJECTED">{t("REJECTED")}</option>
+        <option value="SUSPENDED">{t("SUSPENDED")}</option>
+      </select>
       <button
         className="inline-flex h-9 items-center justify-center gap-2 shrink-0 rounded-[8px] bg-primary px-5 text-[12px] font-medium text-primary-foreground transition hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary/25"
         onClick={onAddDriverClick}
@@ -30,3 +39,4 @@ export default function DriversToolbar({ onAddDriverClick, onSearchChange, searc
     </div>
   );
 }
+import type { DriverStatus } from "@/features/drivers/types/driver";

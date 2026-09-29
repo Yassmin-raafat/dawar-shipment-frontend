@@ -1,8 +1,6 @@
 import type { DataTableColumn } from "@/components/ui/data-table";
-import type { Driver } from "@/features/drivers/types/driver";
-import Image from "next/image";
+import type { DriverListItem } from "@/features/drivers/types/driver";
 import Link from "next/link";
-import DriverActions from "@/features/drivers/components/driver-actions";
 import { useTranslations } from "next-intl";
 
 function getInitials(name: string) {
@@ -14,7 +12,7 @@ function getInitials(name: string) {
     .toUpperCase();
 }
 
-export function useDriverColumns(): DataTableColumn<Driver>[] {
+export function useDriverColumns(): DataTableColumn<DriverListItem>[] {
   const t = useTranslations("drivers");
   return [
   {
@@ -28,11 +26,11 @@ export function useDriverColumns(): DataTableColumn<Driver>[] {
     header: t("profile"),
     cell: (driver) => (
       <div className="flex items-center gap-3">
-        {driver.avatarUrl ? <Image src={driver.avatarUrl} alt={driver.name} width={36} height={36} unoptimized className="size-9 shrink-0 rounded-full object-cover" /> : <div className="grid size-9 shrink-0 place-items-center rounded-full bg-primary-muted text-[13px] font-semibold text-primary">
+        <div className="grid size-9 shrink-0 place-items-center rounded-full bg-primary-muted text-[13px] font-semibold text-primary">
           {getInitials(driver.name)}
-        </div>}
+        </div>
         <div>
-          <Link href={"/drivers/" + encodeURIComponent(driver.id)} className="font-semibold text-text-primary hover:text-primary focus-visible:outline-primary">{driver.name}</Link>
+          <Link href={"/drivers/" + encodeURIComponent(driver.userId)} className="font-semibold text-text-primary hover:text-primary focus-visible:outline-primary">{driver.name}</Link>
           <p className="mt-1 text-[10px] text-text-muted">{driver.id}</p>
         </div>
       </div>
@@ -41,12 +39,12 @@ export function useDriverColumns(): DataTableColumn<Driver>[] {
   {
     key: "phone",
     header: t("contact"),
-    cell: (driver) => driver.phone,
+    cell: (driver) => driver.phoneNumber,
   },
   {
     key: "vehicle",
     header: t("vehicle"),
-    cell: (driver) => driver.vehicle,
+    cell: (driver) => <><span>{driver.vehicleBrand}</span><p className="mt-0.5 text-[10px] text-text-muted">{driver.vehicleType} · {driver.plateNumber}</p></>,
   },
   {
     key: "rating",
@@ -54,15 +52,14 @@ export function useDriverColumns(): DataTableColumn<Driver>[] {
     cell: (driver) => (
       <div>
         <span className="inline-flex items-center gap-1 font-medium"><span className="text-rating">★</span>{driver.rating}</span>
-        <p className="mt-0.5 text-[10px] text-text-muted">{t("onTime", { percent: driver.reliability })}</p>
+        <p className="mt-0.5 text-[10px] text-text-muted">{t(driver.status)}</p>
       </div>
     ),
   },
   {
-    key: "actions",
-    header: t("actions"),
-    className: "w-20 text-center",
-    cell: (driver) => <DriverActions driver={driver} />,
+    key: "status",
+    header: t("status"),
+    cell: (driver) => <span className={driver.status === "ACTIVE" ? "rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-medium text-emerald-700" : "rounded-full bg-secondary px-2 py-1 text-[10px] font-medium text-text-secondary"}>{t(driver.status)}</span>,
   },
   ];
 }

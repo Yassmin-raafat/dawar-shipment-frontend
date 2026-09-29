@@ -12,7 +12,7 @@ export function useSendMessage() {
     mutationFn: ({ conversationId, text }: { conversationId: string; text: string }) => sendMessage(conversationId, text),
     retry: false,
     networkMode: "always",
-    onError: (error) => toast.error(translateError(error.message, "sendError")),
+    onError: (error) => toast.error(translateError(error, "sendError")),
     onSuccess: async (_message, { conversationId }) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: messagesQueryKey(conversationId) }),

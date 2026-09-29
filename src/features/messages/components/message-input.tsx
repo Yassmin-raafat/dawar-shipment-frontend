@@ -43,6 +43,6 @@ export default function MessageInput({ recipient, conversationId }: { recipient:
         <svg aria-hidden="true" className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"><path d="m3 10 18-7-7 18-3-8-8-3Zm8 3L21 3"/></svg>
       </button>
     </div>
-    {showError && <p id="send-message-error" role="alert" className="mt-2 text-[11px] text-destructive">{translateError(mutation.error.message, "sendError")}</p>}
+    {showError && <p id="send-message-error" role="alert" className="mt-2 text-[11px] text-destructive">{translateError(mutation.error, "sendError")}</p>}
   </form>;
 }

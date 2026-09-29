@@ -1,5 +1,35 @@
 import type { Shipment } from "@/features/shipments/types/shipment";
 
+export type DriverStatus = "PENDING_REVIEW" | "ACTIVE" | "REJECTED" | "SUSPENDED";
+
+export type DriverListItem = {
+  id: string;
+  userId: string;
+  name: string;
+  phoneNumber: string;
+  vehicleBrand: string;
+  vehicleType: string;
+  plateNumber: string;
+  rating: number;
+  status: DriverStatus;
+};
+
+export type DriverDetails = DriverListItem;
+
+export type DriversPagination = {
+  totalElements: number;
+  currentPage: number;
+  size: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+};
+
+export type DriversPageResponse = {
+  data: DriverListItem[];
+  pagination: DriversPagination;
+};
+
 export type DriverShipment = {
   recipient: string;
   origin: string;

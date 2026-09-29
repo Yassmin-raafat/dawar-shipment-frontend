@@ -21,8 +21,9 @@ export default function AppHeader() {
   useClickOutside(notificationsRef, closeMenus);
   useClickOutside(profileRef, closeMenus);
 
-  async function handleLogout() {
-    await logout();
+  function handleLogout() {
+    setOpenMenu(null);
+    logout();
     setAuthenticated(false);
     router.replace("/login");
   }
@@ -44,7 +45,7 @@ export default function AppHeader() {
           <svg aria-hidden="true" className="ms-1 size-3 text-text-muted" viewBox="0 0 20 20" fill="none" stroke="currentColor"><path d="m5 7 5 5 5-5"/></svg>
         </button>
         {openMenu === "profile" && <div className="absolute end-0 top-12 z-20 w-40 rounded-xl border border-border bg-card p-1 shadow-lg">
-          <button className="w-full rounded-lg px-3 py-2 text-start text-sm text-text-secondary hover:bg-secondary" onClick={handleLogout} type="button">{t("logout")}</button>
+          <button className="w-full rounded-lg px-3 py-2 text-start text-sm text-text-secondary hover:bg-secondary" onPointerDown={(event) => { event.preventDefault(); handleLogout(); }} type="button">{t("logout")}</button>
         </div>}
       </div>
     </header>

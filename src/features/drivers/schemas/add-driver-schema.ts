@@ -7,16 +7,14 @@ const optionalPhoto = z.file()
 
 export const addDriverSchema = z.object({
   name: z.string().trim().min(1, "Full name is required."),
+  // Confirmed against POST /api/v1/admins/drivers: the API accepts Egyptian
+  // mobile numbers in local format, e.g. 01234567890.
   phone: z.string().trim().min(1, "Phone number is required.")
-    .regex(/^\+?[\d\s()-]+$/, "Enter a valid phone number.")
-    .refine((phone) => {
-      const digits = phone.replace(/\D/g, "");
-      return digits.length >= 8 && digits.length <= 15;
-    }, "Phone number must contain 8–15 digits.")
-    .transform((phone) => phone.startsWith("+") ? phone : "+20 " + phone.replace(/^0/, "")),
+    .regex(/^01\d{9}$/, "Phone number must be a valid Egyptian phone number"),
   nationalId: z.string().trim().min(1, "National ID / License is required."),
   hub: z.string().trim(),
   vehicle: z.string().trim().min(1, "Vehicle brand is required."),
+  vehicleType: z.enum(["CAR", "VAN", "SCOOTER", "TRUCK"]),
   plateNumber: z.string().trim().min(1, "Plate number is required."),
   vehicleColor: z.string().trim(),
   driverPhoto: optionalPhoto,

@@ -1,33 +1,25 @@
-import type { Shipment } from "@/features/shipments/types/shipment";
-import { getDriverById } from "@/services/drivers-api";
+import type { DriverShipment, Pagination, Shipment, ShipmentStatus } from "@/features/shipments/types/shipment";
+import api from "@/lib/axios";
 
-// Session-local source of truth, independent of the query cache.
-const shipments: Shipment[] = [
-  { id: "EG-49125-CAI", recipient: "Ahmed Taha", origin: "Cairo Hub 4", destination: "Maadi Degla", fee: 240, status: "Ready for Pickup" },
-  { id: "EG-50821-GIZ", recipient: "Nour El-Din", origin: "Nasr City DC", destination: "5th Settlement Hub", fee: 240, status: "Pending" },
-  { id: "EG-33921-ALX", recipient: "Farida Youssef", origin: "Cairo Hub 4", destination: "Heliopolis Roxy", fee: 310, status: "Ready for Pickup" },
-];
+type ApiResponse<T> = { status: string; message: string; data: T };
 
-export function getAssignedShipments(driverId: string): Shipment[] {
-  return shipments.filter((shipment) => shipment.driverId === driverId).map((shipment) => ({ ...shipment }));
+export async function getAvailableShipments(params: { page: number; size: number; search?: string }): Promise<{ data: Shipment[]; pagination: Pagination }> {
+  const { data } = await api.get<ApiResponse<Shipment[]> & { pagination: Pagination }>("/api/v1/admins/shipments/available", { params });
+  return { data: data.data, pagination: data.pagination };
 }
 
-export async function getAvailableShipments(): Promise<Shipment[]> {
-  await new Promise((resolve) => setTimeout(resolve, 400));
-  return shipments.filter((shipment) => !shipment.driverId && shipment.status !== "Assigned").map((shipment) => ({ ...shipment }));
+export async function getDriverShipments(userId: string, status?: ShipmentStatus): Promise<DriverShipment[]> {
+  const { data } = await api.get<ApiResponse<{ shipments: DriverShipment[] }>>("/api/v1/admins/get-driver-shipment-by-status", { params: { userId, ...(status ? { status } : {}) } });
+  return data.data.shipments;
 }
 
-export async function assignShipment({ shipmentId, driverId }: { shipmentId: string; driverId: string }): Promise<Shipment> {
-  await getDriverById(driverId);
-  // Check after the await so concurrent submissions cannot claim the same shipment.
-  if (typeof navigator !== "undefined" && !navigator.onLine) {
-    throw new Error("You are offline. Reconnect and try again.");
-  }
-  const index = shipments.findIndex((shipment) => shipment.id === shipmentId);
-  if (index === -1) throw new Error("Shipment not found. Please choose another shipment.");
-  if (shipments[index].driverId || shipments[index].status === "Assigned") {
-    throw new Error("This shipment is no longer available. Please choose another shipment.");
-  }
-  shipments[index] = { ...shipments[index], driverId, status: "Assigned" };
-  return { ...shipments[index] };
+export async function getRecipientName(customerId?: string): Promise<string | null> {
+  if (!customerId) return null;
+  const { data } = await api.get<ApiResponse<Array<{ id: string; name: string }>>>("/api/v1/admins/users", { params: { page: 1, size: 100 } });
+  return data.data?.find((user) => user.id === customerId)?.name ?? null;
+}
+
+export async function assignShipment({ shipmentId, userId }: { shipmentId: string; userId: string }): Promise<{ assignedCount: number }> {
+  const { data } = await api.patch<ApiResponse<{ assignedCount: number }>>(`/api/v1/admins/drivers/${encodeURIComponent(userId)}/assign-shipments`, { shipmentIds: [shipmentId] });
+  return data.data;
 }

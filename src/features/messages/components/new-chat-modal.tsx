@@ -66,7 +66,7 @@ export default function NewChatModal({ onClose, onSuccess }: { onClose: () => vo
         </label>
         <div className="max-h-64 overflow-y-auto">
           {isLoading ? <p role="status" className="py-6 text-center text-xs text-text-secondary">{t("loadingUsers")}</p>
-            : error ? <div role="alert" className="py-6 text-center text-xs text-destructive">{translateError(error.message, "usersError")}<button type="button" onClick={() => void refetch()} className="mx-auto mt-2 block text-primary underline">{t("retryUsers")}</button></div>
+            : error ? <div role="alert" className="py-6 text-center text-xs text-destructive">{translateError(error, "usersError")}<button type="button" onClick={() => void refetch()} className="mx-auto mt-2 block text-primary underline">{t("retryUsers")}</button></div>
             : visibleUsers.length ? <fieldset><legend className="sr-only">{t("availableUsers")}</legend>{visibleUsers.map((user) => <label key={user.id} className={"flex cursor-pointer items-center gap-3 rounded-xl p-3 " + (selectedUserId === user.id ? "bg-primary-muted" : "hover:bg-secondary")}>
               <input type="radio" name="chat-user" value={user.id} checked={selectedUserId === user.id} onChange={() => setSelectedUserId(user.id)} className="accent-primary" />
               <ConversationAvatar conversation={user} />
@@ -76,7 +76,7 @@ export default function NewChatModal({ onClose, onSuccess }: { onClose: () => vo
         </div>
       </fieldset>
       {selectedUserId && <p className="mt-3 text-xs text-text-secondary">{t("selectedUser", { name: users.find((user) => user.id === selectedUserId)?.name ?? "" })}</p>}
-      {mutation.error && <p role="alert" className="mt-3 text-xs text-destructive">{translateError(mutation.error.message, "createError")}</p>}
+      {mutation.error && <p role="alert" className="mt-3 text-xs text-destructive">{translateError(mutation.error, "createError")}</p>}
       <div className="mt-5 flex justify-end gap-2">
         <button type="button" disabled={mutation.isPending} onClick={onClose} className="rounded-xl border border-border/40 px-4 py-2 text-xs disabled:opacity-50">{t("cancel")}</button>
         <button type="submit" disabled={!selectedUserId || mutation.isPending} className="rounded-xl bg-primary px-4 py-2 text-xs text-white disabled:opacity-50">{mutation.isPending ? t("starting") : t("start")}</button>
