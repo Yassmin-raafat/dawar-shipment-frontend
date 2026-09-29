@@ -1,6 +1,22 @@
-import type { User } from "@/features/users/types/user";
+import api from "@/lib/axios";
+import type { ShipmentStatus } from "@/features/orders/types/order";
+import type { User, UserShipmentsResponse } from "@/features/users/types/user";
 
-const users: User[] = [{ id: "USR-001", name: "Zeyad Waleed", phone: "+20 102 991 4452", email: "zeyad.w@epexegypt.com", avatarUrl: "/image%20296.png", totalOrders: 142, logisticsSpend: 38450, activeShipmentCount: 1, fulfillmentRate: 99.2, activeShipment: { id: "#EG-49120-CAI", dateTime: "Today, 08:15 AM", fee: 180, status: "In Progress", origin: "Cairo Hub 4 (Central)", destination: "5th Settlement Hub", driver: "Mahmoud Hassan", progress: 51 }, recentShipments: [{ id: "#EG-49120-CAI", dateTime: "Today, 08:15 AM", fee: 180, status: "In Progress", origin: "Cairo Hub 4 (Central)", destination: "5th Settlement Hub" }, { id: "#EG-38291-MAA", dateTime: "Nov 12, 02:40 PM", fee: 220, status: "Delivered", origin: "Cairo Hub 4", destination: "Maadi Degla" }, { id: "#EG-38104-HEL", dateTime: "Nov 09, 11:15 AM", fee: 140, status: "Delivered", origin: "Cairo Hub 4", destination: "Heliopolis Roxy" }, { id: "#EG-37980-GIZ", dateTime: "Nov 05, 04:20 PM", fee: 195, status: "Delivered", origin: "Cairo Hub 4", destination: "Giza Dokki" }] }];
+type Pagination = { totalElements: number; currentPage: number; size: number; totalPages: number; hasNextPage: boolean; hasPrevPage: boolean };
+type ApiResponse<T> = { status: string; message: string; data: T; pagination?: Pagination };
+export type UsersPage = { data: User[]; pagination: Pagination | null };
 
-export class UserNotFoundError extends Error { constructor() { super("User not found."); this.name = "UserNotFoundError"; } }
-export async function getUserById(id: string): Promise<User> { await new Promise((resolve) => setTimeout(resolve, 450)); const user = users.find((item) => item.id === id || id === "1"); if (user) return user; const fallback: Record<string, [string, string, string]> = { "USR-002": ["Mona Adel", "+20 111 783 9201", "mona.adel@example.com"], "USR-003": ["Omar Khaled", "+20 122 605 1184", "omar.khaled@example.com"], "USR-004": ["Nour Samir", "+20 101 556 7742", "nour.samir@example.com"] }; const details = fallback[id]; if (!details) throw new UserNotFoundError(); return { ...users[0], id, name: details[0], phone: details[1], email: details[2] }; }
+export async function getUsers(page = 1, size = 100): Promise<UsersPage> {
+  const { data } = await api.get<ApiResponse<User[]>>("/api/v1/admins/users", { params: { page, size } });
+  return { data: data.data ?? [], pagination: data.pagination ?? null };
+}
+
+export async function getUserById(id: string): Promise<User | null> {
+  const users = await getUsers();
+  return users.data.find((user) => user.id === id) ?? null;
+}
+
+export async function getUserShipments(userId: string, status?: ShipmentStatus): Promise<UserShipmentsResponse> {
+  const { data } = await api.get<ApiResponse<UserShipmentsResponse>>("/api/v1/admins/get-user-shipment-by-status", { params: { userId, ...(status ? { status } : {}) } });
+  return data.data ?? { userId, shipments: [] };
+}

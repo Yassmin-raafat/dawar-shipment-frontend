@@ -14,7 +14,7 @@ export default function MessageBubble({ message, conversation }: { message: Mess
       </p>
       <div className={"mt-1.5 flex items-center gap-1 px-1 text-[9px] text-[#91a3bd] " + (outgoing ? "justify-end" : "")}>
         <span>{message.timestamp}</span>
-        {outgoing && <span aria-label={message.status === "read" ? t("read") : t("delivered")}><svg aria-hidden="true" className="size-3 text-primary" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.3"><path d="m2 10 4 4 8-8" />{message.status === "read" && <path d="m8 13 2 1 6-8" />}</svg></span>}
+        {outgoing && message.readAt && <span aria-label={t("read")}><svg aria-hidden="true" className="size-3 text-primary" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.3"><path d="m2 10 4 4 8-8" /><path d="m8 13 2 1 6-8" /></svg></span>}
       </div>
     </div>
   </li>;

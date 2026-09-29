@@ -1,11 +1,8 @@
-export type Message = {
-  id: string;
-  sender: string;
-  text: string;
-  timestamp: string;
-  direction: "incoming" | "outgoing";
-  status?: "sending" | "sent" | "delivered" | "read";
-};
+export type UserSummary = { id: string; name: string; profilePhotoUrl: string | null };
+
+export type Message = { id: string; sender: string; text: string; timestamp: string; direction: "incoming" | "outgoing"; readAt: string | null };
+
+export type MessageThread = { currentUser: UserSummary | null; targetUser: UserSummary | null; messages: Message[] };
 
 export type Conversation = {
   id: string;
@@ -14,10 +11,8 @@ export type Conversation = {
   avatarColor: string;
   preview: string;
   timestamp: string;
-  online: boolean;
   unreadCount: number;
   subtitle: string;
-  shipmentId?: string;
-  driverId?: string;
   dateLabel: string;
+  profilePhotoUrl: string | null;
 };

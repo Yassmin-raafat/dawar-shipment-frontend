@@ -22,7 +22,7 @@
   },
   "messages": {
     "title": "Messages",
-    "newChat": "New Chat",
+    "newChat": "New Chat", "newChatUnavailable": "Starting new chats requires backend support",
     "newCount": "{count} New",
     "searchConversations": "Search conversations",
     "searchPlaceholder": "Search driver, shipment ID, name...",
@@ -51,7 +51,7 @@
     "messagePlaceholder": "Type your message to {name}...",
     "emoji": "Choose emoji (coming soon)",
     "emojiSoon": "Emoji picker is coming soon",
-    "send": "Send",
+    "send": "Send", "sendUnavailable": "Sending messages requires backend support",
     "sending": "Sending...",
     "sendError": "Could not send message. Please try again.",
     "selectUser": "Select a user to start a conversation.",

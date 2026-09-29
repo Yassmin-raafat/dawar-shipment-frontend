@@ -1,13 +1,9 @@
-export type UserShipmentStatus = "In Progress" | "Delivered";
+import type { Order, ShipmentStatus } from "@/features/orders/types/order";
 
-export type UserShipment = {
-  id: string; dateTime: string; fee: number; status: UserShipmentStatus;
-  origin: string; destination: string;
-};
-
+export type UserRole = "USER" | "DRIVER" | "ADMIN";
+export type UserStatus = "ACTIVE" | "INACTIVE" | "SUSPENDED";
 export type User = {
-  id: string; name: string; phone: string; email: string; avatarUrl?: string;
-  totalOrders: number; logisticsSpend: number; activeShipmentCount: number;
-  fulfillmentRate: number; activeShipment?: UserShipment & { driver: string; progress: number };
-  recentShipments: UserShipment[];
+  id: string; name: string; email: string | null; phoneNumber: string; profilePhotoUrl: string | null;
+  profilePhotoPublicId: string | null; status: UserStatus; address: string | null; role: UserRole; birthDate: string; totalOrders: number;
 };
+export type UserShipmentsResponse = { userId: string; status?: ShipmentStatus; shipments: Order[] };

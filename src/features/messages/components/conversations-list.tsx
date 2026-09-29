@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import ConversationItem from "./conversation-item";
 import type { Conversation } from "@/features/messages/types/message";
 
-export default function ConversationsList({ conversations, unreadCount, selectedId, search, onSearch, onSelect, isLoading, error, onRetry, onNewChat, hasConversations }: {
+export default function ConversationsList({ conversations, unreadCount, selectedId, search, onSearch, onSelect, onNewChat, isLoading, error, onRetry, hasConversations }: {
   conversations: Conversation[]; unreadCount: number; selectedId: string; search: string; onSearch: (value: string) => void; onSelect: (id: string) => void;
   isLoading: boolean; error?: string; onRetry: () => void; onNewChat: () => void; hasConversations: boolean;
 }) {

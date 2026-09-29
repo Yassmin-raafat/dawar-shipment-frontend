@@ -1,78 +1,79 @@
-import { mockConversations } from "@/features/messages/data/mock-conversations";
-import { mockChatUsers } from "@/features/messages/data/mock-chat-users";
-import type { ChatUser } from "@/features/messages/types/chat-user";
-import type { Conversation, Message } from "@/features/messages/types/message";
+import api from "@/lib/axios";
+import type { Conversation, Message, MessageThread, UserSummary } from "@/features/messages/types/message";
 
-// The service owns session-local data. Query results are copies, never the store.
-const conversations = structuredClone(mockConversations);
-let nextMessageId = 1;
+type ApiEnvelope<T> = { status: string; data: T; pagination?: ChatPagination };
+type ChatPagination = { totalElements: number; currentPage: number; size: number; totalPages: number; hasNextPage: boolean; hasPrevPage: boolean };
+type RawMessage = { id: number; content: string; sentAt: string; readAt: string | null; senderId: string; receiverId: string };
+type RawChat = { targetUser: UserSummary; lastMessage: unknown; lastMessageAt: unknown; unreadCount: number };
+type RawMessagesResponse = { currentUser: UserSummary; targetUser: UserSummary; messages: RawMessage[] };
 
-async function wait(milliseconds = 350) {
-  await new Promise((resolve) => setTimeout(resolve, milliseconds));
-  if (typeof navigator !== "undefined" && navigator.onLine === false) {
-    throw new Error("You are offline. Reconnect and try again.");
+export type ChatsParams = { page: number; size: number; search?: string };
+
+const avatarStyles = ["bg-[#e6ede5] text-[#46604a]", "bg-[#eee6dc] text-[#79624b]", "bg-[#e2e9ef] text-[#476179]", "bg-[#e8e3db] text-[#6b5b40]"];
+
+function getInitials(name: string) {
+  return name.split(/\s+/).filter(Boolean).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "?";
+}
+
+function readString(value: unknown, key?: string): string | null {
+  if (typeof value === "string") return value;
+  if (key && typeof value === "object" && value !== null && key in value) {
+    const nested = (value as Record<string, unknown>)[key];
+    return typeof nested === "string" ? nested : null;
   }
+  return null;
 }
 
-function findConversation(conversationId: string) {
-  const conversation = conversations.find((item) => item.id === conversationId);
-  if (!conversation) throw new Error("Conversation not found.");
-  return conversation;
+function formatTimestamp(value: unknown) {
+  const timestamp = readString(value) ?? readString(value, "sentAt") ?? readString(value, "createdAt");
+  if (!timestamp) return "";
+  const date = new Date(timestamp);
+  if (Number.isNaN(date.getTime())) return timestamp;
+  return new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit" }).format(date);
 }
 
-export async function getConversations(): Promise<Conversation[]> {
-  await wait();
-  return conversations.map((conversation) => {
-    const { messages, ...summary } = conversation;
-    void messages;
-    return { ...summary };
-  });
+function getPreview(value: unknown) {
+  return readString(value) ?? readString(value, "content") ?? "";
 }
 
-export async function getChatUsers(): Promise<ChatUser[]> {
-  await wait();
-  return mockChatUsers.map((user) => ({ ...user }));
-}
-
-export async function createConversation(userId: string): Promise<Conversation> {
-  await wait(600);
-  const user = mockChatUsers.find((item) => item.id === userId);
-  if (!user) throw new Error("User not found. Please select another user.");
-  let conversation = conversations.find((item) => item.id === userId);
-  if (!conversation) {
-    conversation = { ...user, preview: "No messages yet.", timestamp: "Just now", unreadCount: 0, dateLabel: "Today", messages: [] };
-    conversations.unshift(conversation);
-  }
-  const { messages, ...summary } = conversation;
-  void messages;
-  return { ...summary };
-}
-
-export async function getMessages(conversationId: string): Promise<Message[]> {
-  await wait();
-  return findConversation(conversationId).messages.map((message) => ({ ...message }));
-}
-
-export async function markConversationAsRead(conversationId: string): Promise<void> {
-  await wait();
-  findConversation(conversationId).unreadCount = 0;
-}
-
-export async function sendMessage(conversationId: string, text: string): Promise<Message> {
-  const trimmedText = text.trim();
-  if (!trimmedText) throw new Error("Enter a message before sending.");
-  await wait(600);
-  const conversation = findConversation(conversationId);
-  const message: Message = {
-    id: `sent-${nextMessageId++}`,
-    sender: "You",
-    direction: "outgoing",
-    text: trimmedText,
-    timestamp: new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
-    status: "delivered",
+function toConversation(chat: RawChat, index: number): Conversation {
+  const timestamp = formatTimestamp(chat.lastMessageAt);
+  return {
+    id: chat.targetUser.id,
+    name: chat.targetUser.name,
+    initials: getInitials(chat.targetUser.name),
+    avatarColor: avatarStyles[index % avatarStyles.length],
+    preview: getPreview(chat.lastMessage),
+    timestamp,
+    unreadCount: chat.unreadCount,
+    subtitle: "",
+    dateLabel: timestamp,
+    profilePhotoUrl: chat.targetUser.profilePhotoUrl,
   };
-  conversation.messages.push(message);
-  conversation.preview = message.text;
-  conversation.timestamp = "Just now";
-  return { ...message };
+}
+
+export async function getConversations(params: ChatsParams): Promise<Conversation[]> {
+  const { data } = await api.get<ApiEnvelope<RawChat[]>>("/api/v1/messages/chats", {
+    params: { page: params.page, size: params.size, ...(params.search ? { search: params.search } : {}) },
+  });
+  return (data.data ?? []).map(toConversation);
+}
+
+export async function getMessages(targetUserId: string): Promise<MessageThread> {
+  const { data } = await api.get<ApiEnvelope<RawMessagesResponse>>("/api/v1/messages", { params: { targetUserId, page: 1, size: 100 } });
+  const thread = data.data;
+  const messages: Message[] = (thread?.messages ?? []).map((message) => ({
+    id: String(message.id),
+    sender: message.senderId === thread.currentUser.id ? thread.currentUser.name : thread.targetUser.name,
+    text: message.content,
+    timestamp: formatTimestamp(message.sentAt),
+    direction: message.senderId === thread.currentUser.id ? "outgoing" : "incoming",
+    readAt: message.readAt,
+  }));
+  return { currentUser: thread?.currentUser ?? null, targetUser: thread?.targetUser ?? null, messages };
+}
+
+export async function getUnreadChatsCount(): Promise<number> {
+  const { data } = await api.get<ApiEnvelope<{ unreadChats: number }>>("/api/v1/messages/unread-count");
+  return data.data?.unreadChats ?? 0;
 }

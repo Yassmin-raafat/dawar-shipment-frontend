@@ -4,13 +4,12 @@ import { usePathname } from "next/navigation";
 import DawarLogo from "@/components/ui/dawar-logo";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { useConversations } from "@/features/messages/hooks/use-conversations";
+import { useUnreadChatsCount } from "@/features/messages/hooks/use-conversations";
 
 export default function AppSidebar() {
   const pathname = usePathname();
   const t = useTranslations("Navigation");
-  const { data: conversations = [] } = useConversations();
-  const unreadCount = conversations.reduce((total, conversation) => total + conversation.unreadCount, 0);
+  const { data: unreadCount = 0 } = useUnreadChatsCount();
   const navigationItems = [
     {
       href: "/orders",
