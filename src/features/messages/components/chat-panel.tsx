@@ -18,16 +18,24 @@ export default function ChatPanel({ conversation, onBack }: { conversation: Conv
   } = useMessages(conversation.id);
   const historyRef = useRef<HTMLDivElement>(null);
   const messages = thread?.messages ?? [];
+  const targetUser = thread?.targetUser;
+  const headerConversation = targetUser ? {
+    ...conversation,
+    name: targetUser.name,
+    initials: targetUser.name.split(/\s+/).filter(Boolean).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "?",
+    profilePhotoUrl: targetUser.profilePhotoUrl,
+  } : conversation;
   const lastMessageId = messages.at(-1)?.id;
   useEffect(() => {
     const history = historyRef.current;
     if (history) history.scrollTop = history.scrollHeight;
   }, [conversation.id, lastMessageId]);
-  return <section aria-label={t("conversationWith", { name: conversation.name })} className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl bg-background">
+  return <section aria-label={t("conversationWith", { name: headerConversation.name })} className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl bg-background">
     <header className="flex shrink-0 items-center gap-3 border-b border-border/30 bg-card px-4 py-3">
       <button type="button" onClick={onBack} aria-label={t("back")} className="grid size-7 shrink-0 place-items-center rounded-lg text-text-secondary hover:bg-secondary md:hidden"><svg aria-hidden="true" className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="m14 5-7 7 7 7"/></svg></button>
-      <ConversationAvatar conversation={conversation} />
-      <div><button type="button" aria-disabled="true" aria-label={t("options")} title={t("optionsSoon")} className="grid size-7 shrink-0 place-items-center rounded-lg text-[#91a3bd] hover:bg-secondary focus-visible:outline-2 focus-visible:outline-primary">···</button></div>
+      <ConversationAvatar conversation={headerConversation} />
+      <div className="min-w-0 flex-1"><p className="truncate text-xs font-semibold text-text-primary">{headerConversation.name}</p></div>
+      <button type="button" aria-disabled="true" aria-label={t("options")} title={t("optionsSoon")} className="grid size-7 shrink-0 place-items-center rounded-lg text-[#91a3bd] hover:bg-secondary focus-visible:outline-2 focus-visible:outline-primary">···</button>
     </header>
     <div ref={historyRef} key={`history-${conversation.id}`} role="region" aria-label={t("history")} tabIndex={0} className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-6 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/20 sm:px-5">
       {conversation.dateLabel && <p className="py-8 text-center text-[9px] text-[#91a3bd]">{conversation.dateLabel}</p>}

@@ -8,9 +8,11 @@ import { useTranslations } from "next-intl";
 import ThemeToggle from "./theme-toggle";
 import { useCallback, useRef, useState } from "react";
 import useClickOutside from "@/hooks/use-click-outside";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function AppHeader() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const t = useTranslations("Header");
   const user = useAuthStore((state) => state.user);
   const setAuthenticated = useAuthStore((state) => state.setAuthenticated);
@@ -25,6 +27,7 @@ export default function AppHeader() {
     setOpenMenu(null);
     logout();
     setAuthenticated(false);
+    queryClient.clear();
     router.replace("/login");
   }
 
