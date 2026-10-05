@@ -27,6 +27,8 @@ const osmRasterStyle: StyleSpecification = {
   layers: [{ id: "osm", type: "raster", source: "osm" }],
 };
 
+maplibregl.setWorkerUrl("/maplibre-gl-worker.js");
+
 function createMarkerElement(color: string, label: string) {
   const element = document.createElement("div");
   element.className = "order-map-marker";

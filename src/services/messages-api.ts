@@ -1,5 +1,6 @@
 import api from "@/lib/axios";
 import type { Conversation, Message, MessageThread, UserSummary } from "@/features/messages/types/message";
+import { setMessagesCurrentUserId } from "@/features/messages/services/messages-current-user";
 
 type ApiEnvelope<T> = { status: string; data: T; pagination?: ChatPagination };
 type ChatPagination = { totalElements: number; currentPage: number; size: number; totalPages: number; hasNextPage: boolean; hasPrevPage: boolean };
@@ -62,6 +63,7 @@ export async function getConversations(params: ChatsParams): Promise<Conversatio
 export async function getMessages(targetUserId: string): Promise<MessageThread> {
   const { data } = await api.get<ApiEnvelope<RawMessagesResponse>>("/api/v1/messages", { params: { targetUserId, page: 1, size: 100 } });
   const thread = data.data;
+  setMessagesCurrentUserId(thread?.currentUser?.id ?? null);
   const messages: Message[] = (thread?.messages ?? []).map((message) => ({
     id: String(message.id),
     sender: message.senderId === thread.currentUser.id ? thread.currentUser.name : thread.targetUser.name,

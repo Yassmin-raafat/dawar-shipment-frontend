@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useAuthStore } from "@/features/auth/stores/auth-store";
+import { disconnectMessagesSocket } from "@/features/messages/services/messages-socket";
 
 export default function AuthInitializer() {
   const checkAuth = useAuthStore((state) => state.checkAuth);
@@ -11,7 +12,10 @@ export default function AuthInitializer() {
   }, [checkAuth]);
 
   useEffect(() => {
-    const handleUnauthorized = () => useAuthStore.getState().setAuthenticated(false);
+    const handleUnauthorized = () => {
+      disconnectMessagesSocket();
+      useAuthStore.getState().setAuthenticated(false);
+    };
     window.addEventListener("auth:unauthorized", handleUnauthorized);
     return () => window.removeEventListener("auth:unauthorized", handleUnauthorized);
   }, []);

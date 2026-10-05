@@ -6,6 +6,7 @@ import MessageInput from "./message-input";
 import type { Conversation } from "@/features/messages/types/message";
 import { useMessages } from "@/features/messages/hooks/use-messages";
 import { useEffect, useRef } from "react";
+import { useMessagesSocket } from "@/features/messages/hooks/use-messages-socket";
 
 export default function ChatPanel({ conversation, onBack }: { conversation: Conversation; onBack: () => void }) {
   const t = useTranslations("messages");
@@ -18,6 +19,7 @@ export default function ChatPanel({ conversation, onBack }: { conversation: Conv
   } = useMessages(conversation.id);
   const historyRef = useRef<HTMLDivElement>(null);
   const messages = thread?.messages ?? [];
+  const { sendMessage, isSending } = useMessagesSocket(conversation.id);
   const targetUser = thread?.targetUser;
   const headerConversation = targetUser ? {
     ...conversation,
@@ -44,6 +46,6 @@ export default function ChatPanel({ conversation, onBack }: { conversation: Conv
         : messages.length ? <ol className="space-y-7">{messages.map((message) => <MessageBubble key={message.id} message={message} conversation={conversation} />)}</ol>
         : <p role="status" className="py-5 text-center text-xs text-text-secondary">{t("emptyMessages")}</p>}
     </div>
-    <MessageInput recipient={conversation.name} />
+    <MessageInput recipient={conversation.name} conversationId={conversation.id} onSend={sendMessage} isSending={isSending} />
   </section>;
 }

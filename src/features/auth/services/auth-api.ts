@@ -3,6 +3,7 @@ import axios from "axios";
 import { getApiErrorMessage } from "@/lib/get-api-error-message";
 import { getAccessToken, getAuthUser, removeAccessToken, saveAccessToken, saveAuthUser } from "@/features/auth/services/auth-storage";
 import type { AdminLoginRequest, AdminLoginResponse, AuthUser } from "@/features/auth/types/auth";
+import { disconnectMessagesSocket } from "@/features/messages/services/messages-socket";
 
 export async function loginAdmin(email: string, password: string): Promise<AdminLoginResponse> {
   const payload: AdminLoginRequest = { email, password };
@@ -15,6 +16,7 @@ export async function loginAdmin(email: string, password: string): Promise<Admin
 }
 
 export function logout() {
+  disconnectMessagesSocket();
   removeAccessToken();
 }
 
